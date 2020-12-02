@@ -26,7 +26,7 @@ learning the details of any specific feature.
 | Salt              | 18    |
 | Starter           | 40    |
 | **Total Grams**   |       |
-<!-- TBLFM:  @>$2=sum(@I..@-1) -->
+<!-- TBLFM: @>$2=sum(@I..@-1) -->
 ```
 
 Formulas are added to tables as an HTML comment directly following the table.
