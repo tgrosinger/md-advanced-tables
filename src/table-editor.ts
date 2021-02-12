@@ -1122,7 +1122,7 @@ export class TableEditor {
    * @param func - A function that does some operation on table information obtained by
    * {@link TableEditor#_findTable}.
    */
-  private withCompletedTable<T>(
+  public withCompletedTable<T>(
     options: Options,
     func: (tableInfo: TableInfo) => T,
   ): T | undefined {
