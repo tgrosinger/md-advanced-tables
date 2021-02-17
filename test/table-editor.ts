@@ -5536,6 +5536,24 @@ describe('TableEditor', () => {
   });
 
   /**
+   * @test {TableEditor#exportTable}
+   */
+  describe('#_updateLines(startRow, endRow, newLines, oldLines = undefined)', () => {
+    it('should update lines in the specified range', () => {
+      {
+        const textEditor = new TextEditor([
+          '| A   | B   |',
+          '| --- | --- |',
+          '| C   | D   |',
+          '| E   | F   |'
+        ]);
+        const tableEditor = new TableEditor(textEditor);
+        const result = tableEditor.exportTable(defaultOptions);
+        expect(result).to.be.equal([['A', 'B'], ['C', 'D'], ['E', 'F']]);
+      }
+    })
+  });
+  /**
    * @test {TableEditor#formatAll}
    */
   describe('#formatAll(options)', () => {

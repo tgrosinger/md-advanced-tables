@@ -1117,12 +1117,25 @@ export class TableEditor {
   }
 
   /**
+   * Exports the table as a two dimensional string array
+   */
+  public exportTable(options: Options): string[][] | undefined {
+    return this.withCompletedTable(
+      options,
+      ({ range, lines, formulaLines, table, focus }: TableInfo) => {
+        const bodyRows = table.getRows();
+        return bodyRows.map(row=>row.getCells().map(cell=>cell.content));
+      },
+    );
+  }
+
+  /**
    * Finds a table, completes it, then does an operation with it.
    *
    * @param func - A function that does some operation on table information obtained by
    * {@link TableEditor#_findTable}.
    */
-  public withCompletedTable<T>(
+  private withCompletedTable<T>(
     options: Options,
     func: (tableInfo: TableInfo) => T,
   ): T | undefined {
