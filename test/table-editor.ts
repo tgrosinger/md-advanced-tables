@@ -4830,6 +4830,38 @@ describe('TableEditor', () => {
         ]);
       }
       {
+        // Empty cells should not count against sorting numberically
+        const textEditor = new TextEditor([
+          'foo',
+          '| A   | B   |',
+          '| --- | --- |',
+          '| E   | 2   |',
+          '| E   | 12  |',
+          '| 1   |     |',
+          '| C   | 1   |',
+          '| 5   | 3   |',
+          'bar',
+        ]);
+        textEditor.setCursorPosition(new Point(4, 10));
+        const tableEditor = new TableEditor(textEditor);
+        tableEditor.sortRows(SortOrder.Descending, defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(pos.row).to.equal(4);
+        expect(pos.column).to.equal(8);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| A   | B   |',
+          '| --- | --- |',
+          '| E   | 12  |',
+          '| 5   | 3   |',
+          '| E   | 2   |',
+          '| C   | 1   |',
+          '| 1   |     |',
+          'bar',
+        ]);
+      }
+      {
         // If all cells are numbers, sort numberically not alphabetically
         const textEditor = new TextEditor([
           'foo',

@@ -859,7 +859,7 @@ export class TableEditor {
         const notAllNums = sortingCells.some((cell) => {
           // return true if not a number
           if (!cell || cell.content === '') {
-            return true;
+            return false;
           }
           return isNaN(parseFloat(cell.content));
         });
@@ -868,12 +868,12 @@ export class TableEditor {
           const cellA = rowA.getCellAt(focus.column);
           const cellB = rowB.getCellAt(focus.column);
 
-          if (cellA === undefined) {
-            if (cellB === undefined) {
+          if (cellA === undefined || cellA.content === '') {
+            if (cellB === undefined || cellB.content === '') {
               return 0;
             }
             return -1;
-          } else if (cellB === undefined) {
+          } else if (cellB === undefined || cellB.content === '') {
             return 1;
           }
 
@@ -1175,26 +1175,23 @@ export class TableEditor {
     options: Options,
     func: (tableInfo: TableInfo) => T,
   ): T | undefined {
-    return this._withTable(
-      options,
-      (tableInfo: TableInfo): T => {
-        let newFocus = tableInfo.focus;
-        // complete
-        const completed = completeTable(tableInfo.table, options);
-        if (completed.delimiterInserted && newFocus.row > 0) {
-          newFocus = newFocus.setRow(newFocus.row + 1);
-        }
-        // format
-        const formatted = formatTable(completed.table, options);
-        newFocus = newFocus.setOffset(
-          _computeNewOffset(newFocus, completed.table, formatted, false),
-        );
+    return this._withTable(options, (tableInfo: TableInfo): T => {
+      let newFocus = tableInfo.focus;
+      // complete
+      const completed = completeTable(tableInfo.table, options);
+      if (completed.delimiterInserted && newFocus.row > 0) {
+        newFocus = newFocus.setRow(newFocus.row + 1);
+      }
+      // format
+      const formatted = formatTable(completed.table, options);
+      newFocus = newFocus.setOffset(
+        _computeNewOffset(newFocus, completed.table, formatted, false),
+      );
 
-        tableInfo.table = formatted.table;
-        tableInfo.focus = newFocus;
-        return func(tableInfo);
-      },
-    );
+      tableInfo.table = formatted.table;
+      tableInfo.focus = newFocus;
+      return func(tableInfo);
+    });
   }
 
   /**
