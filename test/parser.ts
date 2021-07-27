@@ -86,6 +86,24 @@ describe('_splitCells(text)', () => {
       '` B ',
       ' ',
     ]);
+    expect(_splitCells(' | [[link]] | Something | ')).to.deep.equal([
+      ' ',
+      ' [[link]] ',
+      ' Something ',
+      ' ',
+    ]);
+    expect(_splitCells(' | [[link\\|renamed]] | Something | ')).to.deep.equal([
+      ' ',
+      ' [[link\\|renamed]] ',
+      ' Something ',
+      ' ',
+    ]);
+    expect(_splitCells(' | [[link|renamed]] | Something | ')).to.deep.equal([
+      ' ',
+      ' [[link\\|renamed]] ',
+      ' Something ',
+      ' ',
+    ]);
   });
 });
 

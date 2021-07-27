@@ -67,6 +67,17 @@ export const _splitCells = (text: string): string[] => {
           rest = rest.substr(1);
         }
         break;
+      case '[':
+        // If we encounter a renamed [[link|Link]], automatically escape the pipe
+        buf += '[';
+        rest = rest.substr(1);
+        if (/\[[^\\|\]]+\|[^|\]]+]]/.test(rest)) {
+          const idx = rest.indexOf('|');
+          buf += rest.slice(0, idx);
+          buf += '\\|';
+          rest = rest.substr(idx + 1);
+        }
+        break;
       case '|':
         // flush buffer
         cells.push(buf);
