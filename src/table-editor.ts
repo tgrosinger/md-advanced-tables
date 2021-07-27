@@ -855,14 +855,12 @@ export class TableEditor {
       ({ range, lines, formulaLines, table, focus }: TableInfo) => {
         const bodyRows = table.getRows().slice(2);
 
-        const sortingCells = bodyRows.map((row) => row.getCellAt(focus.column));
-        const notAllNums = sortingCells.some((cell) => {
-          // return true if not a number
-          if (!cell || cell.content === '') {
-            return false;
-          }
-          return isNaN(parseFloat(cell.content));
-        });
+        const notAllNums = bodyRows
+          .map((row) => row.getCellAt(focus.column)?.content)
+          .some(
+            (cell) =>
+              cell !== undefined && cell !== '' && isNaN(parseFloat(cell)),
+          );
 
         bodyRows.sort((rowA, rowB): number => {
           const cellA = rowA.getCellAt(focus.column);
