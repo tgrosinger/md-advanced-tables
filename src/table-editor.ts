@@ -878,10 +878,10 @@ export class TableEditor {
           }
 
           const contentA = notAllNums
-            ? cellA.content
+            ? cellA.content.replace(/[*~_$]/g, '')
             : parseFloat(cellA.content);
           const contentB = notAllNums
-            ? cellB.content
+            ? cellB.content.replace(/[*~_$]/g, '')
             : parseFloat(cellB.content);
 
           if (contentA === contentB) {

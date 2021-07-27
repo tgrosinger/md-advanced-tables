@@ -4893,6 +4893,38 @@ describe('TableEditor', () => {
           'bar',
         ]);
       }
+      {
+        // Ignore markdown formatting characters when sorting
+        const textEditor = new TextEditor([
+          'foo',
+          '| A   | B       |',
+          '| --- | ------- |',
+          '| E   | Zod     |',
+          '| E   | Bob     |',
+          '| 1   | **Tod** |',
+          '| C   | ~~Rob~~ |',
+          '| 5   | Albert  |',
+          'bar',
+        ]);
+        textEditor.setCursorPosition(new Point(4, 10));
+        const tableEditor = new TableEditor(textEditor);
+        tableEditor.sortRows(SortOrder.Ascending, defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(pos.row).to.equal(4);
+        expect(pos.column).to.equal(8);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| A   | B       |',
+          '| --- | ------- |',
+          '| 5   | Albert  |',
+          '| E   | Bob     |',
+          '| C   | ~~Rob~~ |',
+          '| 1   | **Tod** |',
+          '| E   | Zod     |',
+          'bar',
+        ]);
+      }
     });
   });
 
