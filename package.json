@@ -1,6 +1,6 @@
 {
   "name": "@tgrosinger/md-advanced-tables",
-  "version": "3.6.0",
+  "version": "3.7.0",
   "description": "A text editor independent library for advanced manipulation, formatting, and spreadsheets in markdown tables.",
   "keywords": [
     "markdown",
