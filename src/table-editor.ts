@@ -845,6 +845,87 @@ export class TableEditor {
   }
 
   /**
+   * Transpose rows and columns of a table by inverting the X and Y axis values.
+   * @param options 
+   */
+  public transpose(options: Options): void {
+    this.withCompletedTable(
+      options,
+      ({ range, lines, formulaLines, table, focus }: TableInfo) => {
+
+        const width: number = table.getWidth();
+        const height: number = table.getHeight();
+
+        const newRows: TableRow[] = new Array<TableRow>(width+1);
+
+        /**
+         * Loop through the columns/width (x), then rows/height (y) to create rows one at a time.
+         */
+        for (let x=0; x < width+1; ++x) { // -1 to remove delimiter
+
+          // First Column
+          if (x === 0) {
+            const newRow: TableCell[] = new Array<TableCell>(height-1); // no delimiter
+            for (let y=0; y < height; ++y) {
+              if (y === 0) {       // header
+                const s: string = table.getCellAt(y,x)?.content ?? ''
+                newRow[y] = new TableCell(s);
+              }
+              else if (y === 1) {  // delimiter (skip)
+                continue; 
+              } 
+              else if (y > 1) {              // content
+                const s: string = table.getCellAt(y,x)?.content ?? '';
+                newRow[y-1] = new TableCell(s);
+              }
+            }
+            newRows[x] = new TableRow(newRow,'','');
+          }
+          // 2nd column (skip reference index to create header row)
+          else if (x === 1) {
+            const newRow: TableCell[] = new Array<TableCell>(height-1);
+            for (let i=0; i<height-1; ++i) {
+              newRow[i] = new TableCell(' --- ');
+            }
+            newRows[x] = new TableRow(newRow,'','');
+            continue;
+          }
+          // Rest of columns (2nd or more)
+          else if (x > 1) {
+            const newRow: TableCell[] = new Array<TableCell>(height-1); // no delimiter
+            for (let y=0; y < height; ++y) {
+              if (y === 0) {       // header
+                const s: string = table.getCellAt(y,x-1)?.content ?? '';
+                newRow[y] = new TableCell(s);
+              }
+              else if (y === 1) {  // delimiter (skip grabbing value)
+                continue; 
+              } 
+              else if (y > 1) {              // content
+                const s: string = table.getCellAt(y,x-1)?.content ?? '';
+                newRow[y-1] = new TableCell(s);
+              }
+            }
+            newRows[x] = new TableRow(newRow,'','');
+          }
+        }
+
+        const newTable = new Table(newRows);
+
+        const { table: formattedTable, focus: newFocus } = this.formatAndApply(
+          options,
+          range,
+          lines,
+          formulaLines,
+          newTable,
+          focus,
+          true,
+        );
+        this._moveToFocus(range.start.row, formattedTable, newFocus);
+      },
+    );
+  }
+  /**
    * Sorts rows alphanumerically using the column at the current focus.
    * If all cells in the sorting column are numbers, the column is sorted
    * numerically.

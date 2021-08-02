@@ -4629,6 +4629,38 @@ describe('TableEditor', () => {
   });
 
   /**
+   * @test {TableEditor#transpose}
+   */
+   describe('#transpose()', () => {
+    it('should transpose X and Y of a table (including headers), formatted the same.', () => {
+      {
+        const textEditor = new TextEditor([
+          'foo',
+          '| A   | B   |',
+          '| --- | --- |',
+          '| 1   | 2   |',
+          '| 3   | 4   |',
+          'bar',
+        ]);
+        textEditor.setCursorPosition(new Point(3,1));
+        const tableEditor = new TableEditor(textEditor);
+        tableEditor.transpose(defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        // expect(pos.row).to.equal(3);
+        // expect(pos.column).to.equal(2);
+        // expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| A   | 1   | 3   |',
+          '| --- | --- | --- |',
+          '| B   | 2   | 4   |',
+          'bar',
+        ]);
+      }
+    })
+  });
+
+  /**
    * @test {TableEditor#sortRows}
    */
   describe('#sortRows(sortOrder)', () => {
