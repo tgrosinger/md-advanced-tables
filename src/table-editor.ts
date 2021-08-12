@@ -10,6 +10,7 @@ import {
   FormattedTable,
   insertColumn,
   insertRow,
+  insertRowBelow,
   moveColumn,
   moveRow,
 } from './formatter';
@@ -729,6 +730,40 @@ export class TableEditor {
           newFocus = newFocus.setRow(2);
         }
         newFocus = newFocus.setColumn(0);
+        // insert an empty row
+        const row = new Array(table.getHeaderWidth()).fill(new TableCell(''));
+        const altered = insertRow(
+          table,
+          newFocus.row,
+          new TableRow(row, '', ''),
+        );
+
+        this.formatAndApply(
+          options,
+          range,
+          lines,
+          formulaLines,
+          altered,
+          newFocus,
+        );
+      },
+    );
+  }
+
+  /**
+   * Inserts an empty row before the current focus.
+   */
+  public insertRowBelow(options: Options): void {
+    this.withCompletedTable(
+      options,
+      ({ range, lines, formulaLines, table, focus }: TableInfo) => {
+        let newFocus = focus;
+        // move focus
+        if (newFocus.row <= 1) {
+          newFocus = newFocus.setRow(2);
+        }
+        newFocus = newFocus.setColumn(0);
+        newFocus = newFocus.setRow(newFocus.row + 1);
         // insert an empty row
         const row = new Array(table.getHeaderWidth()).fill(new TableCell(''));
         const altered = insertRow(
