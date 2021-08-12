@@ -10,7 +10,6 @@ import {
   FormattedTable,
   insertColumn,
   insertRow,
-  insertRowBelow,
   moveColumn,
   moveRow,
 } from './formatter';
