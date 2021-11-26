@@ -1957,5 +1957,72 @@ describe('Formulas', () => {
         ]);
       }
     });
+
+    it('should apply multiple formula lines sequentially', () => {
+      {
+        const textEditor = new TextEditor([
+          'foo',
+          '| A   | B   |',
+          '| --- | --- |',
+          '| 1   | 2   |',
+          '| 3   | 4   |',
+          '| 5   | 6   |',
+          '|     |     |',
+          '<!-- TBLFM: @>$>=@3 -->',
+          '<!-- TBLFM: @>$1=@4 -->',
+        ]);
+        textEditor.setCursorPosition(new Point(1, 0));
+        const tableEditor = new TableEditor(textEditor);
+        const err = tableEditor.evaluateFormulas(defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(err).to.be.undefined;
+        expect(pos.row).to.equal(1);
+        expect(pos.column).to.equal(0);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| A   | B   |',
+          '| --- | --- |',
+          '| 1   | 2   |',
+          '| 3   | 4   |',
+          '| 5   | 6   |',
+          '| 5   | 4   |',
+          '<!-- TBLFM: @>$>=@3 -->',
+          '<!-- TBLFM: @>$1=@4 -->',
+        ]);
+      }
+      {
+        const textEditor = new TextEditor([
+          'foo',
+          '| A   | B   |',
+          '| --- | --- |',
+          '| 1   | 2   |',
+          '| 3   | 4   |',
+          '| 5   | 6   |',
+          '|     |     |',
+          '<!-- TBLFM: @>$>=@3 -->',
+          '<!-- TBLFM: @>$1=(@>$2+3) -->',
+        ]);
+        textEditor.setCursorPosition(new Point(1, 0));
+        const tableEditor = new TableEditor(textEditor);
+        const err = tableEditor.evaluateFormulas(defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(err).to.be.undefined;
+        expect(pos.row).to.equal(1);
+        expect(pos.column).to.equal(0);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| A   | B   |',
+          '| --- | --- |',
+          '| 1   | 2   |',
+          '| 3   | 4   |',
+          '| 5   | 6   |',
+          '| 7   | 4   |',
+          '<!-- TBLFM: @>$>=@3 -->',
+          '<!-- TBLFM: @>$1=(@>$2+3) -->',
+        ]);
+      }
+    });
   });
 });

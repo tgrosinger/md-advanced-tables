@@ -170,7 +170,7 @@ export const parseAndApply = (
   // If there is no error,
   return formulas.andThen((innerFormulas: Formula[]) =>
     // for each formula
-    innerFormulas.reduce<Result<Table, Error>>(
+    innerFormulas.reduceRight<Result<Table, Error>>(
       (prevValue, formula) =>
         // If the previous formula didn't give an error
         prevValue.andThen(
