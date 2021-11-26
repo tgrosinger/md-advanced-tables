@@ -4925,6 +4925,40 @@ describe('TableEditor', () => {
           'bar',
         ]);
       }
+      {
+        // Do not incorrectly parse dates as numbers
+        const textEditor = new TextEditor([
+          'foo',
+          '| date       |     |',
+          '| ---------- | --- |',
+          '| 2021-07-17 |     |',
+          '| 2021-09-15 |     |',
+          '| 2021-09-10 |     |',
+          '| 2021-07-17 |     |',
+          '| 2021-09-16 |     |',
+          '| 2021-09-15 |     |',
+          'bar',
+        ]);
+        textEditor.setCursorPosition(new Point(4, 10));
+        const tableEditor = new TableEditor(textEditor);
+        tableEditor.sortRows(SortOrder.Ascending, defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(pos.row).to.equal(4);
+        expect(pos.column).to.equal(2);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| date       |     |',
+          '| ---------- | --- |',
+          '| 2021-07-17 |     |',
+          '| 2021-07-17 |     |',
+          '| 2021-09-10 |     |',
+          '| 2021-09-15 |     |',
+          '| 2021-09-15 |     |',
+          '| 2021-09-16 |     |',
+          'bar',
+        ]);
+      }
     });
   });
 

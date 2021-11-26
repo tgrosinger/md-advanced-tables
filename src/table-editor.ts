@@ -855,12 +855,12 @@ export class TableEditor {
       ({ range, lines, formulaLines, table, focus }: TableInfo) => {
         const bodyRows = table.getRows().slice(2);
 
+        const isNumber = (s: string): boolean =>
+          /^\s*[-+]?((\d+(\.\d+)?)|(\d+\.)|(\.\d+))([eE][-+]?\d+)?\s*$/.test(s);
+
         const notAllNums = bodyRows
           .map((row) => row.getCellAt(focus.column)?.content)
-          .some(
-            (cell) =>
-              cell !== undefined && cell !== '' && isNaN(parseFloat(cell)),
-          );
+          .some((cell) => cell !== undefined && cell !== '' && !isNumber(cell));
 
         bodyRows.sort((rowA, rowB): number => {
           const cellA = rowA.getCellAt(focus.column);
