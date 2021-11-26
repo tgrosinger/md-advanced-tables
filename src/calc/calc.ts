@@ -214,9 +214,20 @@ export const parseFormula = (
     return err(lengthError);
   }
 
-  const formulas = ast.children[0].children;
+  let unparsedFormulas = ast.children[0].children;
+  const formulas: Formula[] = [];
+
   try {
-    return ok(formulas.map((formula) => new Formula(formula, table)));
+    do {
+      formulas.push(new Formula(unparsedFormulas[0], table));
+
+      if (unparsedFormulas.length > 1 && unparsedFormulas[1].type === 'formula_list') {
+        unparsedFormulas = unparsedFormulas[1].children;
+      } else {
+        unparsedFormulas = [];
+      }
+    } while (unparsedFormulas.length > 0);
+    return ok(formulas);
   } catch (error) {
     return err(error);
   }
