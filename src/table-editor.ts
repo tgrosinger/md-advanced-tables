@@ -139,7 +139,8 @@ export class TableEditor {
   }
 
   /**
-   * Checks if the cursor is in a table row.
+   * Checks if the cursor is in a table row. Returns false if the cursor is in a
+   * table formula row (see cursorIsInTableFormula).
    * This is useful to check whether the table editor should be activated or not.
    *
    * @returns `true` if the cursor is in a table row.
@@ -154,6 +155,21 @@ export class TableEditor {
   }
 
   /**
+   * Checks if the cursor is in a formula row below a table.
+   * This is useful to check whether the table editor should be activated or not.
+   *
+   * @returns `true` if the cursor is in a formula row.
+   */
+  public cursorIsInTableFormula(options: Options): boolean {
+    const formulaRe = _createIsTableFormulaRegex(options.leftMarginChars);
+    const pos = this._textEditor.getCursorPosition();
+    return (
+      this._textEditor.acceptsTableEdit(pos.row) &&
+      formulaRe.test(this._textEditor.getLine(pos.row))
+    );
+  }
+
+  /**
    * Finds a table under the current cursor position.
    *
    * @returns undefined if there is no table or the determined focus is invalid.
@@ -161,12 +177,23 @@ export class TableEditor {
   _findTable(options: Options): TableInfo | undefined {
     const re = _createIsTableRowRegex(options.leftMarginChars);
     const formulaRe = _createIsTableFormulaRegex(options.leftMarginChars);
-    const pos = this._textEditor.getCursorPosition();
+    let pos = this._textEditor.getCursorPosition();
     const lastRow = this._textEditor.getLastRow();
     const lines = [];
     const formulaLines = [];
     let startRow = pos.row;
     let endRow = pos.row; // endRow is last line before fomulas
+
+    // if the cursor is on formula line, work up until we find the last row of the table
+    {
+      let line = this._textEditor.getLine(pos.row);
+      while (formulaRe.test(line) && pos.row >= 0) {
+        pos = new Point(pos.row - 1, pos.column);
+        endRow--;
+        line = this._textEditor.getLine(pos.row);
+      }
+    }
+
     // current line
     {
       const line = this._textEditor.getLine(pos.row);

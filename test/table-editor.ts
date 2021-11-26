@@ -228,6 +228,32 @@ describe('TableEditor', () => {
     });
   });
 
+  describe('#cursorIsInTableFormula(options)', () => {
+    it('should return true if the cursor of the text editor is in a formula line', () => {
+      {
+        const textEditor = new TextEditor([
+          'foo',
+          '| A   | B   |',
+          '| --- | --- |',
+          '| C   | D   |',
+          '<!-- TBLFM: @>$2=sum(@I..@-1) -->',
+          'bar',
+        ]);
+        textEditor.acceptsTableEdit = (row) => row !== 1 && row !== 6;
+        const ops = defaultOptions;
+        const tableEditor = new TableEditor(textEditor);
+        textEditor.setCursorPosition(new Point(0, 0));
+        expect(tableEditor.cursorIsInTableFormula(ops)).to.be.false;
+        textEditor.setCursorPosition(new Point(4, 0));
+        expect(tableEditor.cursorIsInTableFormula(ops)).to.be.true;
+        textEditor.setCursorPosition(new Point(4, 10));
+        expect(tableEditor.cursorIsInTableFormula(ops)).to.be.true;
+        textEditor.setCursorPosition(new Point(5, 2));
+        expect(tableEditor.cursorIsInTableFormula(ops)).to.be.false;
+      }
+    });
+  });
+
   /**
    * @test {TableEditor#cursorIsInTable}
    */
@@ -672,6 +698,62 @@ describe('TableEditor', () => {
         expect(info.formulaLines[1]).to.equal(
           '<!-- TBLFM: @2$3..@3$4=vmean(@3..@I-1$>-1) -->',
         );
+      }
+    });
+
+    it('should find the table if the cursor is in a formula line', () => {
+      const textEditor = new TextEditor([
+        'foo',
+        '| A   | B   |',
+        '| --- | --- |',
+        '| C   | D   |',
+        '| E   | F   |',
+        '<!-- TBLFM: @2=@3 -->',
+        '<!-- TBLFM: @2$3..@3$4=vmean(@3..@I-1$>-1) -->',
+        'bar',
+      ]);
+      textEditor.acceptsTableEdit = (_) => true;
+      const tableEditor = new TableEditor(textEditor);
+      textEditor.setCursorPosition(new Point(6, 2));
+      {
+        const ops = defaultOptions;
+        const info = tableEditor._findTable(ops);
+        if (info === undefined) {
+          assert.fail();
+        }
+        expect(info).to.be.an('object');
+        expect(info.range).to.be.an.instanceOf(Range);
+        expect(info.range.start.row).to.equal(1);
+        expect(info.range.start.column).to.equal(0);
+        expect(info.range.end.row).to.equal(4);
+        expect(info.range.end.column).to.equal(13);
+        expect(info.lines).to.deep.equal([
+          '| A   | B   |',
+          '| --- | --- |',
+          '| C   | D   |',
+          '| E   | F   |',
+        ]);
+        expect(info.table).to.be.an.instanceOf(Table);
+        expect(info.table.toLines()).to.deep.equal([
+          '| A   | B   |',
+          '| --- | --- |',
+          '| C   | D   |',
+          '| E   | F   |',
+        ]);
+        expect(info.focus).to.be.an.instanceOf(Focus);
+        expect(info.focus.row).to.equal(3);
+        expect(info.focus.column).to.equal(0);
+        expect(info.focus.offset).to.equal(1);
+        expect(info.formulaLines).to.be.an('array').of.length(2);
+        expect(info.formulaLines[0]).to.equal('<!-- TBLFM: @2=@3 -->');
+        expect(info.formulaLines[1]).to.equal(
+          '<!-- TBLFM: @2$3..@3$4=vmean(@3..@I-1$>-1) -->',
+        );
+      }
+      textEditor.setCursorPosition(new Point(7, 0));
+      {
+        const ops = defaultOptions;
+        expect(tableEditor._findTable(ops)).to.be.undefined;
       }
     });
 
