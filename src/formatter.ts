@@ -4,6 +4,7 @@ import { Table } from './table';
 import { TableCell } from './table-cell';
 import { TableRow } from './table-row';
 import { getEAW } from 'meaw';
+const removeMd = require('remove-md');
 
 export interface FormattedTable {
   /**
@@ -209,8 +210,15 @@ export const _computeTextWidth = (
   text: string,
   options: TextWidthOptions,
 ): number => {
-  const normalized = options.normalize ? text.normalize('NFC') : text;
+  const unformattedText = removeMd(text);
+  const normalized = options.normalize
+    ? unformattedText.normalize('NFC')
+    : unformattedText;
   let w = 0;
+  // If text has inline link add 2 spaces to account for the link icon
+  if (/\[([^\]]*?)\][\[\(].*?[\]\)]/g.test(text)) {
+    w += 2;
+  }
   for (const char of normalized) {
     if (options.wideChars.has(char)) {
       w += 2;
