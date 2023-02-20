@@ -215,10 +215,6 @@ export const _computeTextWidth = (
     ? unformattedText.normalize('NFC')
     : unformattedText;
   let w = 0;
-  // If text has inline link add 2 spaces to account for the link icon
-  if (/\[([^\]]*?)\][\[\(].*?[\]\)]/g.test(text)) {
-    w += 2;
-  }
   for (const char of normalized) {
     if (options.wideChars.has(char)) {
       w += 2;
@@ -283,6 +279,14 @@ export const _alignText = (
  * @private
  */
 export const _padText = (text: string): string => ` ${text} `;
+
+/**
+ * Returns true if markdown string contains inline link, else false
+ *
+ * @private
+ */
+const _detectMdLink = (text: string): boolean => /\[([^\]]*?)\][\[\(]https?:\/\/.*?[\]\)]/g.test(text);
+
 
 /**
  * Formats a table.
@@ -355,7 +359,7 @@ export const _formatTable = (
               _padText(
                 _alignText(
                   cell.content,
-                  columnWidths[j],
+                  _detectMdLink (cell.content) ? columnWidths[j] : columnWidths[j] + 2,
                   options.headerAlignment === HeaderAlignment.FOLLOW
                     ? alignments[j] === Alignment.NONE
                       ? options.defaultAlignment
@@ -378,7 +382,7 @@ export const _formatTable = (
           .getCells()
           .map(
             (cell, j) =>
-              new TableCell(_delimiterText(alignments[j], columnWidths[j])),
+              new TableCell(_delimiterText(alignments[j], _detectMdLink(cell.content) ? columnWidths[j] : columnWidths[j] + 2)),
           ),
         marginLeft,
         '',
@@ -398,7 +402,7 @@ export const _formatTable = (
                 _padText(
                   _alignText(
                     cell.content,
-                    columnWidths[j],
+                    _detectMdLink(cell.content) ? columnWidths[j] : columnWidths[j] + 2,
                     alignments[j] === Alignment.NONE
                       ? options.defaultAlignment
                       : alignments[j],
