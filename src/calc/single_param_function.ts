@@ -1,8 +1,9 @@
+import Decimal from 'decimal.js';
 import { ok, Result } from '../neverthrow/neverthrow';
 import { Table } from '../table';
 import { Cell, checkChildLength, checkType, ValueProvider } from './ast_utils';
 import { Source } from './calc';
-import { Value } from './results';
+import { FloatOrSeconds, Value } from './results';
 import { IToken } from 'ebnf';
 
 export class SingleParamFunctionCall implements ValueProvider {
@@ -52,16 +53,13 @@ export class SingleParamFunctionCall implements ValueProvider {
  * Sum all the cells in the input value, producing a single cell output.
  */
 const sum = (value: Value): Value => {
-  const total = value.val.reduce<number>(
-    (runningTotal, currentRow): number =>
-      currentRow.reduce<number>((rowTotal, currentCell): number => {
-        let currentCellValue = parseFloat(currentCell);
-        if (isNaN(currentCellValue)) {
-          currentCellValue = 0;
-        }
-        return rowTotal + currentCellValue;
+  const total = value.val.reduce(
+    (runningTotal, currentRow): Decimal =>
+      currentRow.reduce((rowTotal, currentCell): Decimal => {
+        const currentCellValue = FloatOrSeconds(currentCell);
+        return currentCellValue.add(rowTotal);
       }, runningTotal),
-    0,
+    new Decimal(0),
   );
 
   return new Value([[total.toString()]]);

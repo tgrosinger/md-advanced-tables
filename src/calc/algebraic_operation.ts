@@ -2,8 +2,8 @@ import { Table } from '..';
 import { err, ok, Result } from '../neverthrow/neverthrow';
 import { Cell, checkChildLength, checkType, ValueProvider } from './ast_utils';
 import { Source } from './calc';
-import { Constant } from './constant';
 import { FloatOrSeconds, Value } from './results';
+import Decimal from 'decimal.js';
 import { IToken } from 'ebnf';
 import { map } from 'lodash';
 
@@ -64,7 +64,7 @@ export class AlgebraicOperation implements ValueProvider {
     cell: Cell,
     name: string,
     canHaveRightRange: boolean,
-    fn: (left: number, right: number) => number,
+    fn: (left: Decimal, right: Decimal) => Decimal,
   ): Result<Value, Error> => {
     const leftValue = this.leftSource.getValue(table, cell);
     if (leftValue.isErr()) {
@@ -93,7 +93,7 @@ export class AlgebraicOperation implements ValueProvider {
     }
 
     if (rightArity.isCell()) {
-      const rightCellValue = rightValue.value.getAsFloat(0, 0);
+      const rightCellValue = rightValue.value.getAsNumber(0, 0);
 
       const result: string[][] = map(
         leftValue.value.val,
@@ -106,7 +106,7 @@ export class AlgebraicOperation implements ValueProvider {
       return ok(new Value(result));
     }
 
-    const leftCellValue = leftValue.value.getAsFloat(0, 0);
+    const leftCellValue = leftValue.value.getAsNumber(0, 0);
 
     const result: string[][] = map(
       rightValue.value.val,
@@ -125,7 +125,7 @@ export class AlgebraicOperation implements ValueProvider {
       cell,
       'add',
       true,
-      (left, right): number => left + right,
+      (left, right): Decimal => left.plus(right),
     );
 
   private readonly subtract = (
@@ -137,7 +137,7 @@ export class AlgebraicOperation implements ValueProvider {
       cell,
       'subtract',
       true,
-      (left, right): number => left - right,
+      (left, right): Decimal => left.minus(right),
     );
 
   private readonly multiply = (
@@ -149,7 +149,7 @@ export class AlgebraicOperation implements ValueProvider {
       cell,
       'multiply',
       true,
-      (left, right): number => left * right,
+      (left, right): Decimal => left.times(right),
     );
 
   private readonly divide = (table: Table, cell: Cell): Result<Value, Error> =>
@@ -158,6 +158,6 @@ export class AlgebraicOperation implements ValueProvider {
       cell,
       'divide',
       false,
-      (left, right): number => left / right,
+      (left, right): Decimal => left.dividedBy(right),
     );
 }

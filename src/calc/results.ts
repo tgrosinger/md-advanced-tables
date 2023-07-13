@@ -1,16 +1,22 @@
+import Decimal from 'decimal.js';
 import { flatten } from 'lodash';
 
 const datetimeRe = new RegExp(
   '[1-9][0-9]{3}-[01][0-9]-[0-3][0-9][T ][0-2][0-9]:[0-5][0-9]',
 );
 
-export const FloatOrSeconds = (value: string): number => {
-  if (datetimeRe.test(value)) {
-    return new Date(value).valueOf() / 1000;
+export const FloatOrSeconds = (value: string): Decimal => {
+  const v = value.trim();
+  if (v === '') {
+    return new Decimal(0);
   }
 
-  const parsed = parseFloat(value);
-  return Number.isNaN(parsed) ? 0 : parsed;
+  if (datetimeRe.test(v)) {
+    return new Decimal(new Date(v).valueOf() / 1000);
+  }
+
+  const decimalValue = new Decimal(v);
+  return decimalValue.isNaN() ? new Decimal(0) : decimalValue;
 };
 
 export class Arity {
@@ -38,14 +44,9 @@ export class Value {
 
   public get = (row: number, column: number): string => this.val[row][column];
 
-  public getAsFloat = (row: number, column: number): number => {
+  public getAsNumber = (row: number, column: number): Decimal => {
     const value = this.get(row, column);
     return FloatOrSeconds(value);
-  };
-
-  public getAsInt = (row: number, column: number): number => {
-    const parsed = parseInt(this.get(row, column));
-    return isNaN(parsed) ? 0 : parsed;
   };
 
   /**

@@ -100,22 +100,22 @@ class Predicate {
       );
     }
 
-    const leftVal = leftData.value.getAsFloat(0, 0);
-    const rightVal = rightData.value.getAsFloat(0, 0);
+    const leftVal = leftData.value.getAsNumber(0, 0);
+    const rightVal = rightData.value.getAsNumber(0, 0);
 
     switch (this.operator) {
       case '>':
-        return ok(leftVal > rightVal);
+        return ok(leftVal.greaterThan(rightVal));
       case '>=':
-        return ok(leftVal >= rightVal);
+        return ok(leftVal.greaterThanOrEqualTo(rightVal));
       case '<':
-        return ok(leftVal < rightVal);
+        return ok(leftVal.lessThan(rightVal));
       case '<=':
-        return ok(leftVal <= rightVal);
+        return ok(leftVal.lessThanOrEqualTo(rightVal));
       case '==':
-        return ok(leftVal === rightVal);
+        return ok(leftVal.equals(rightVal));
       case '!=':
-        return ok(leftVal !== rightVal);
+        return ok(!leftVal.equals(rightVal));
       default:
         return err(Error('Invalid conditional operator: ' + this.operator));
     }

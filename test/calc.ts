@@ -495,6 +495,65 @@ describe('Formulas', () => {
       }
     });
 
+    it('should not have floating point arithmetic errors', () => {
+      {
+        const textEditor = new TextEditor([
+          'foo',
+          '| A   |',
+          '| --- |',
+          '| 0.1 |',
+          '| 0.2 |',
+          '|     |',
+          '<!-- TBLFM: @>$1=sum(@I..@-1) -->',
+        ]);
+        textEditor.setCursorPosition(new Point(1, 0));
+        const tableEditor = new TableEditor(textEditor);
+        const err = tableEditor.evaluateFormulas(defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(err).to.be.undefined;
+        expect(pos.row).to.equal(1);
+        expect(pos.column).to.equal(0);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| A   |',
+          '| --- |',
+          '| 0.1 |',
+          '| 0.2 |',
+          '| 0.3 |',
+          '<!-- TBLFM: @>$1=sum(@I..@-1) -->',
+        ]);
+      }
+      {
+        const textEditor = new TextEditor([
+          'foo',
+          '| A   |',
+          '| --- |',
+          '| 0.1 |',
+          '| 0.2 |',
+          '|     |',
+          '<!-- TBLFM: @>$1=(@2$1+@3$1) -->',
+        ]);
+        textEditor.setCursorPosition(new Point(1, 0));
+        const tableEditor = new TableEditor(textEditor);
+        const err = tableEditor.evaluateFormulas(defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(err).to.be.undefined;
+        expect(pos.row).to.equal(1);
+        expect(pos.column).to.equal(0);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| A   |',
+          '| --- |',
+          '| 0.1 |',
+          '| 0.2 |',
+          '| 0.3 |',
+          '<!-- TBLFM: @>$1=(@2$1+@3$1) -->',
+        ]);
+      }
+    });
+
     it('should perform simple arithmetic with other cells', () => {
       {
         const textEditor = new TextEditor([
@@ -1796,11 +1855,11 @@ describe('Formulas', () => {
         expect(textEditor.getSelectionRange()).to.be.undefined;
         expect(textEditor.getLines()).to.deep.equal([
           'foo',
-          '| A                   | B                  | C                  | D                  |',
-          '| ------------------- | ------------------ | ------------------ | ------------------ |',
-          '| 1                   | 2                  | 5                  | 6                  |',
-          '| 3                   | 4                  | 7                  | 8                  |',
-          '| 0.14285714285714285 | 0.2857142857142857 | 0.7142857142857143 | 0.8571428571428571 |',
+          '| A                      | B                      | C                      | D                      |',
+          '| ---------------------- | ---------------------- | ---------------------- | ---------------------- |',
+          '| 1                      | 2                      | 5                      | 6                      |',
+          '| 3                      | 4                      | 7                      | 8                      |',
+          '| 0.14285714285714285714 | 0.28571428571428571429 | 0.71428571428571428571 | 0.85714285714285714286 |',
           '<!-- TBLFM: @>=(@I / @3$3) -->',
         ]);
       }
