@@ -2,7 +2,7 @@ import { ok, Result } from '../neverthrow/neverthrow';
 import { Table } from '../table';
 import { Cell, checkChildLength, checkType, ValueProvider } from './ast_utils';
 import { Source } from './calc';
-import { FloatOrSeconds, Value } from './results';
+import { FloatOrMilliseconds, Value } from './results';
 import Decimal from 'decimal.js';
 import { IToken } from 'ebnf';
 
@@ -56,7 +56,7 @@ const sum = (value: Value): Value => {
   const total = value.val.reduce(
     (runningTotal, currentRow): Decimal =>
       currentRow.reduce((rowTotal, currentCell): Decimal => {
-        const currentCellValue = FloatOrSeconds(currentCell);
+        const currentCellValue = FloatOrMilliseconds(currentCell);
         return currentCellValue.add(rowTotal);
       }, runningTotal),
     new Decimal(0),

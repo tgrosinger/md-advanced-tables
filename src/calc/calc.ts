@@ -57,8 +57,9 @@ algebraic_operation ::= "(" source " "? algebraic_operator " "? source ")"
 algebraic_operator  ::= "+" | "-" | "*" | "/"
 
 display_directive        ::= ";" display_directive_option
-display_directive_option ::= formatting_directive
+display_directive_option ::= formatting_directive | datetime_directive
 formatting_directive     ::= "%." int "f"
+datetime_directive           ::= "dt"
 
 float ::= "-"? int "." int
 real ::= "-"? int

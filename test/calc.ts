@@ -468,12 +468,12 @@ describe('Formulas', () => {
       {
         const textEditor = new TextEditor([
           'foo',
-          '| A                  | B      | C   |',
-          '| ------------------ | ------ | --- |',
-          '| 2023-07-12 05:15   | 300    |     |',
-          '| 2022-05-15 15:55   | 600    |     |',
-          '| 2021-10-31 23:00   | 1200   |     |',
-          '<!-- TBLFM: $3=(@0$1+@0$2) -->',
+          '| A                  | B         | C   |',
+          '| ------------------ | --------- | --- |',
+          '| 2023-07-12 05:15   | 300000    |     |',
+          '| 2022-05-15 15:55   | 600000    |     |',
+          '| 2021-10-31 23:00   | 1200000   |     |',
+          '<!-- TBLFM: $3=(@0$1+@0$2);dt -->',
         ]);
         textEditor.setCursorPosition(new Point(1, 0));
         const tableEditor = new TableEditor(textEditor);
@@ -485,12 +485,40 @@ describe('Formulas', () => {
         expect(textEditor.getSelectionRange()).to.be.undefined;
         expect(textEditor.getLines()).to.deep.equal([
           'foo',
-          '| A                | B    | C          |',
-          '| ---------------- | ---- | ---------- |',
-          '| 2023-07-12 05:15 | 300  | 1689139200 |',
-          '| 2022-05-15 15:55 | 600  | 1652630700 |',
-          '| 2021-10-31 23:00 | 1200 | 1635722400 |',
-          '<!-- TBLFM: $3=(@0$1+@0$2) -->',
+          '| A                | B       | C                |',
+          '| ---------------- | ------- | ---------------- |',
+          '| 2023-07-12 05:15 | 300000  | 2023-07-12 05:20 |',
+          '| 2022-05-15 15:55 | 600000  | 2022-05-15 16:05 |',
+          '| 2021-10-31 23:00 | 1200000 | 2021-10-31 23:20 |',
+          '<!-- TBLFM: $3=(@0$1+@0$2);dt -->',
+        ]);
+      }
+      {
+        const textEditor = new TextEditor([
+          'foo',
+          '| A                 | B                | C   |',
+          '| ----------------- | ---------------- | --- |',
+          '| 2023-07-12 05:20  | 2023-07-12 05:15 |     |',
+          '| 2022-05-15 16:05  | 2022-05-15 15:55 |     |',
+          '| 2021-10-31 23:20  | 2021-10-31 23:00 |     |',
+          '<!-- TBLFM: $3=(@0$1-@0$2) -->',
+        ]);
+        textEditor.setCursorPosition(new Point(1, 0));
+        const tableEditor = new TableEditor(textEditor);
+        const err = tableEditor.evaluateFormulas(defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(err).to.be.undefined;
+        expect(pos.row).to.equal(1);
+        expect(pos.column).to.equal(0);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| A                | B                | C       |',
+          '| ---------------- | ---------------- | ------- |',
+          '| 2023-07-12 05:20 | 2023-07-12 05:15 | 300000  |',
+          '| 2022-05-15 16:05 | 2022-05-15 15:55 | 600000  |',
+          '| 2021-10-31 23:20 | 2021-10-31 23:00 | 1200000 |',
+          '<!-- TBLFM: $3=(@0$1-@0$2) -->',
         ]);
       }
     });
@@ -1945,6 +1973,30 @@ describe('Formulas', () => {
           '| 3   | 4   | 7   | 8   |',
           '| 0   | 0   | 1   | 1   |',
           '<!-- TBLFM: @>=(@I / @3$3);%.0f -->',
+        ]);
+      }
+      {
+        const textEditor = new TextEditor([
+          'foo',
+          '| A                | B      | C |',
+          '| ---------------- | ------ | - |',
+          '| 2023-07-12 10:00 | 600000 |   |',
+          '<!-- TBLFM: $>=($1 + $2);dt -->',
+        ]);
+        textEditor.setCursorPosition(new Point(1, 0));
+        const tableEditor = new TableEditor(textEditor);
+        const err = tableEditor.evaluateFormulas(defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(err).to.be.undefined;
+        expect(pos.row).to.equal(1);
+        expect(pos.column).to.equal(0);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| A                | B      | C                |',
+          '| ---------------- | ------ | ---------------- |',
+          '| 2023-07-12 10:00 | 600000 | 2023-07-12 10:10 |',
+          '<!-- TBLFM: $>=($1 + $2);dt -->',
         ]);
       }
     });

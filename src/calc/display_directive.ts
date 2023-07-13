@@ -16,6 +16,7 @@ export class DefaultFormatter {
 
 export class DisplayDirective {
   private readonly decimalLength: number;
+  private readonly displayAsDatetime: boolean;
 
   constructor(ast: IToken) {
     let typeError = checkType(ast, 'display_directive');
@@ -42,9 +43,19 @@ export class DisplayDirective {
 
     const formattingDirective = displayDirectiveOption.children[0];
 
-    typeError = checkType(formattingDirective, 'formatting_directive');
+    typeError = checkType(
+      formattingDirective,
+      'formatting_directive',
+      'datetime_directive',
+    );
     if (typeError) {
       throw typeError;
+    }
+
+    this.displayAsDatetime = formattingDirective.type === 'datetime_directive';
+    if (this.displayAsDatetime) {
+      this.decimalLength = -1;
+      return;
     }
 
     lengthError = checkChildLength(formattingDirective, 1);
@@ -63,10 +74,20 @@ export class DisplayDirective {
   }
 
   public format = (num: number | string): string => {
-    if (typeof num === 'string') {
-      const parsedNum = parseFloat(num);
-      return parsedNum.toFixed(this.decimalLength);
+    const parsed = typeof num === 'string' ? parseFloat(num) : num;
+
+    if (this.displayAsDatetime) {
+      // Seriously, there's no date formatting functionality in Javascript?
+      const date = new Date(parsed);
+      const pad = (v: number): string => `0${v}`.slice(-2);
+      const y = date.getFullYear();
+      const mo = pad(date.getMonth() + 1);
+      const d = pad(date.getDate());
+      const h = pad(date.getHours());
+      const min = pad(date.getMinutes());
+      return `${y}-${mo}-${d} ${h}:${min}`;
     }
-    return num.toFixed(this.decimalLength);
+
+    return parsed.toFixed(this.decimalLength);
   };
 }

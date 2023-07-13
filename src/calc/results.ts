@@ -5,14 +5,14 @@ const datetimeRe = new RegExp(
   '[1-9][0-9]{3}-[01][0-9]-[0-3][0-9][T ][0-2][0-9]:[0-5][0-9]',
 );
 
-export const FloatOrSeconds = (value: string): Decimal => {
+export const FloatOrMilliseconds = (value: string): Decimal => {
   const v = value.trim();
   if (v === '') {
     return new Decimal(0);
   }
 
   if (datetimeRe.test(v)) {
-    return new Decimal(new Date(v).valueOf() / 1000);
+    return new Decimal(new Date(v).valueOf());
   }
 
   const decimalValue = new Decimal(v);
@@ -46,7 +46,7 @@ export class Value {
 
   public getAsNumber = (row: number, column: number): Decimal => {
     const value = this.get(row, column);
-    return FloatOrSeconds(value);
+    return FloatOrMilliseconds(value);
   };
 
   /**

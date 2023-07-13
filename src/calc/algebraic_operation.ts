@@ -2,7 +2,7 @@ import { Table } from '..';
 import { err, ok, Result } from '../neverthrow/neverthrow';
 import { Cell, checkChildLength, checkType, ValueProvider } from './ast_utils';
 import { Source } from './calc';
-import { FloatOrSeconds, Value } from './results';
+import { FloatOrMilliseconds, Value } from './results';
 import Decimal from 'decimal.js';
 import { IToken } from 'ebnf';
 import { map } from 'lodash';
@@ -99,7 +99,7 @@ export class AlgebraicOperation implements ValueProvider {
         leftValue.value.val,
         (currentRow: string[]): string[] =>
           map(currentRow, (currentCell: string): string => {
-            const leftCellValue = FloatOrSeconds(currentCell);
+            const leftCellValue = FloatOrMilliseconds(currentCell);
             return fn(leftCellValue, rightCellValue).toString();
           }),
       );
@@ -112,7 +112,7 @@ export class AlgebraicOperation implements ValueProvider {
       rightValue.value.val,
       (currentRow: string[]): string[] =>
         map(currentRow, (currentCell: string): string => {
-          const rightCellValue = FloatOrSeconds(currentCell);
+          const rightCellValue = FloatOrMilliseconds(currentCell);
           return fn(leftCellValue, rightCellValue).toString();
         }),
     );
