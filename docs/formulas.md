@@ -380,6 +380,36 @@ In this example, the formatting directive is the `;%.2f` at the end. Without
 that, the results would be values such as `0.14285714285714285`, but because
 we have requested `2` decimal points, the results will instead be `0.14`.
 
+You may also output the result as a datetime with the `;dt` formatting
+directive. In this example, we take a datetime and add 600000 milliseconds, then
+output the result as a datetime.
+
+```
+| Start            | Ms     | End              |
+| ---------------- | ------ | ---------------- |
+| 2023-07-12 10:00 | 600000 | 2023-07-12 10:10 |
+<!-- TBLFM: $>=($1 + $2);dt -->
+```
+
+## Times and Durations
+
+There is very basic support for operating on times in tables.
+
+Times are always represented as either a datetime string (2022-12-31 23:59), or
+as milliseconds since the epoch (1672559940000). When operating with durations,
+they must be expressed in milliseconds.
+
+For example, we can subtract an end time from a start time and view the duration
+in minutes:
+
+```
+| Start            | End              | Ms     | Min |
+| ---------------- | ---------------- | ------ | --- |
+| 2023-07-12 10:00 | 2023-07-12 10:10 | 600000 | 10  |
+<!-- TBLFM: $3=($2 - $1) -->
+<!-- TBLFM: $4=($3 / 60000) -->
+```
+
 ## Conclusion
 
 This documentation is a work in progress. Please help improve this

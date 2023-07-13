@@ -1999,6 +1999,32 @@ describe('Formulas', () => {
           '<!-- TBLFM: $>=($1 + $2);dt -->',
         ]);
       }
+      {
+        const textEditor = new TextEditor([
+          'foo',
+          '| Start            | End              | Ms     | Min |',
+          '| ---------------- | ---------------- | ------ | --- |',
+          '| 2023-07-12 10:00 | 2023-07-12 10:10 | | |',
+          '<!-- TBLFM: $3=($2 - $1) -->',
+          '<!-- TBLFM: $4=($3 / 60000) -->',
+        ]);
+        textEditor.setCursorPosition(new Point(1, 0));
+        const tableEditor = new TableEditor(textEditor);
+        const err = tableEditor.evaluateFormulas(defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(err).to.be.undefined;
+        expect(pos.row).to.equal(1);
+        expect(pos.column).to.equal(0);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| Start            | End              | Ms     | Min |',
+          '| ---------------- | ---------------- | ------ | --- |',
+          '| 2023-07-12 10:00 | 2023-07-12 10:10 | 600000 | 10  |',
+          '<!-- TBLFM: $3=($2 - $1) -->',
+          '<!-- TBLFM: $4=($3 / 60000) -->',
+        ]);
+      }
     });
 
     it('should return an error if the formula is invalid', () => {
