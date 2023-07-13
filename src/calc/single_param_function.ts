@@ -1,9 +1,9 @@
-import Decimal from 'decimal.js';
 import { ok, Result } from '../neverthrow/neverthrow';
 import { Table } from '../table';
 import { Cell, checkChildLength, checkType, ValueProvider } from './ast_utils';
 import { Source } from './calc';
 import { FloatOrSeconds, Value } from './results';
+import Decimal from 'decimal.js';
 import { IToken } from 'ebnf';
 
 export class SingleParamFunctionCall implements ValueProvider {

@@ -7,8 +7,8 @@ import { newRow, Row } from './row';
 import { IToken } from 'ebnf';
 
 export class Reference {
-  row: Row | undefined;
-  column: Column | undefined;
+  public readonly row: Row | undefined;
+  public readonly column: Column | undefined;
 
   constructor(ast: IToken, table: Table) {
     const typeErr = checkType(
