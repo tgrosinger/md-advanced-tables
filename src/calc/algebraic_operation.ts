@@ -107,22 +107,21 @@ export class AlgebraicOperation implements ValueProvider {
           }),
       );
       return ok(new Value(result));
-    } 
-      const leftCellValue = leftValue.value.getAsFloat(0, 0);
+    }
+    const leftCellValue = leftValue.value.getAsFloat(0, 0);
 
-      const result: string[][] = map(
-        rightValue.value.val,
-        (currentRow: string[]): string[] =>
-          map(currentRow, (currentCell: string): string => {
-            let rightCellValue = parseFloat(currentCell);
-            if (isNaN(leftCellValue)) {
-              rightCellValue = 0;
-            }
-            return fn(leftCellValue, rightCellValue).toString();
-          }),
-      );
-      return ok(new Value(result));
-    
+    const result: string[][] = map(
+      rightValue.value.val,
+      (currentRow: string[]): string[] =>
+        map(currentRow, (currentCell: string): string => {
+          let rightCellValue = parseFloat(currentCell);
+          if (isNaN(leftCellValue)) {
+            rightCellValue = 0;
+          }
+          return fn(leftCellValue, rightCellValue).toString();
+        }),
+    );
+    return ok(new Value(result));
   };
 
   private readonly add = (table: Table, cell: Cell): Result<Value, Error> =>

@@ -221,7 +221,10 @@ export const parseFormula = (
     do {
       formulas.push(new Formula(unparsedFormulas[0], table));
 
-      if (unparsedFormulas.length > 1 && unparsedFormulas[1].type === 'formula_list') {
+      if (
+        unparsedFormulas.length > 1 &&
+        unparsedFormulas[1].type === 'formula_list'
+      ) {
         unparsedFormulas = unparsedFormulas[1].children;
       } else {
         unparsedFormulas = [];
