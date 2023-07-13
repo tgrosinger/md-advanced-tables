@@ -3,7 +3,7 @@ import { err, ok, Result } from '../neverthrow/neverthrow';
 import { Cell, checkChildLength, checkType, ValueProvider } from './ast_utils';
 import { Source } from './calc';
 import { Constant } from './constant';
-import { Value } from './results';
+import { FloatOrSeconds, Value } from './results';
 import { IToken } from 'ebnf';
 import { map } from 'lodash';
 
@@ -99,25 +99,20 @@ export class AlgebraicOperation implements ValueProvider {
         leftValue.value.val,
         (currentRow: string[]): string[] =>
           map(currentRow, (currentCell: string): string => {
-            let leftCellValue = parseFloat(currentCell);
-            if (isNaN(leftCellValue)) {
-              leftCellValue = 0;
-            }
+            const leftCellValue = FloatOrSeconds(currentCell);
             return fn(leftCellValue, rightCellValue).toString();
           }),
       );
       return ok(new Value(result));
     }
+
     const leftCellValue = leftValue.value.getAsFloat(0, 0);
 
     const result: string[][] = map(
       rightValue.value.val,
       (currentRow: string[]): string[] =>
         map(currentRow, (currentCell: string): string => {
-          let rightCellValue = parseFloat(currentCell);
-          if (isNaN(leftCellValue)) {
-            rightCellValue = 0;
-          }
+          const rightCellValue = FloatOrSeconds(currentCell);
           return fn(leftCellValue, rightCellValue).toString();
         }),
     );

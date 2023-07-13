@@ -1,5 +1,18 @@
 import { flatten } from 'lodash';
 
+const datetimeRe = new RegExp(
+  '[1-9][0-9]{3}-[01][0-9]-[0-3][0-9][T ][0-2][0-9]:[0-5][0-9]',
+);
+
+export const FloatOrSeconds = (value: string): number => {
+  if (datetimeRe.test(value)) {
+    return new Date(value).valueOf() / 1000;
+  }
+
+  const parsed = parseFloat(value);
+  return Number.isNaN(parsed) ? 0 : parsed;
+};
+
 export class Arity {
   public rows: number;
   public cols: number;
@@ -26,8 +39,8 @@ export class Value {
   public get = (row: number, column: number): string => this.val[row][column];
 
   public getAsFloat = (row: number, column: number): number => {
-    const parsed = parseFloat(this.get(row, column));
-    return isNaN(parsed) ? 0 : parsed;
+    const value = this.get(row, column);
+    return FloatOrSeconds(value);
   };
 
   public getAsInt = (row: number, column: number): number => {
