@@ -1,7 +1,7 @@
 # Formulas in Markdown Tables
 
 One of the most exciting features this library adds (in my opinion) are
-formulas. The format for these fomulas is very similar to that used in
+formulas. The format for these formulas is very similar to that used in
 [org-mode](https://orgmode.org/), though not quite as powerful.
 
 A brief overview of the features:
@@ -12,7 +12,7 @@ A brief overview of the features:
 - Value comparisons
 - Algebraic operations
 
-## The Fomula Structure - An Overview
+## The Formula Structure - An Overview
 
 Let's write an example formula, and become familiar with the structure before
 learning the details of any specific feature.
@@ -138,7 +138,7 @@ When used together, the row should always preceed the column.
 
 ### Ranges
 
-With just rows and columns, the fomula is limited to selecting single cells,
+With just rows and columns, the formula is limited to selecting single cells,
 or full rows and columns. Using a range, a formula can select partial
 rows/columns, as well as multiple rows/columns.
 
