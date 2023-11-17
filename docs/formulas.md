@@ -66,7 +66,7 @@ refer to parts of the table.
 
 - `@<` and `$<` mean the first row and first column, respectively.
 - `@>` and `$>` mean the last row and last column, respectively.
-- `@I` referrs to the line separating the table header from the table body.
+- `@I` refers to the line separating the table header from the table body.
 
 Rows and columns can also be referenced in relation to the current cell being
 filled. For example, `@-1` means "the same column, one row above", and `$+2`
