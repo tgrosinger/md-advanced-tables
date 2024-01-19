@@ -523,6 +523,112 @@ describe('Formulas', () => {
       }
     });
 
+    it('should convert hours and minutes to milliseconds', () => {
+      {
+        const textEditor = new TextEditor([
+          'foo',
+          '| A      | B    |',
+          '| ------ | ---- |',
+          '| 05:20  |      |',
+          '| 16:05  |      |',
+          '| 23:20  |      |',
+          '| 00:01  |      |',
+          '| 29:59  |      |',
+          '<!-- TBLFM: $2=($1+0) -->',
+        ]);
+        textEditor.setCursorPosition(new Point(1, 0));
+        const tableEditor = new TableEditor(textEditor);
+        const err = tableEditor.evaluateFormulas(defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(err).to.be.undefined;
+        expect(pos.row).to.equal(1);
+        expect(pos.column).to.equal(0);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| A     | B         |',
+          '| ----- | --------- |',
+          '| 05:20 | 19200000  |',
+          '| 16:05 | 57900000  |',
+          '| 23:20 | 84000000  |',
+          '| 00:01 | 60000     |',
+          '| 29:59 | 107940000 |',
+          '<!-- TBLFM: $2=($1+0) -->',
+        ]);
+      }
+    });
+
+    it('should perform simple arithmetic with hours and minutes', () => {
+      {
+        const textEditor = new TextEditor([
+          'foo',
+          '| A       | B         | C   |',
+          '| ------- | --------- | --- |',
+          '| 05:15   | 300000    |     |',
+          '| 15:55   | 600000    |     |',
+          '| 23:00   | 1200000   |     |',
+          '| 05:15   | 00:05     |     |',
+          '| 15:55   | 00:10     |     |',
+          '| 15:55   | 0:10      |     |',
+          '| 23:00   | 00:20     |     |',
+          '| 23:00   | -00:20    |     |',
+          '<!-- TBLFM: $3=(@0$1+@0$2);hm -->',
+        ]);
+        textEditor.setCursorPosition(new Point(1, 0));
+        const tableEditor = new TableEditor(textEditor);
+        const err = tableEditor.evaluateFormulas(defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(err).to.be.undefined;
+        expect(pos.row).to.equal(1);
+        expect(pos.column).to.equal(0);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| A     | B       | C     |',
+          '| ----- | ------- | ----- |',
+          '| 05:15 | 300000  | 05:20 |',
+          '| 15:55 | 600000  | 16:05 |',
+          '| 23:00 | 1200000 | 23:20 |',
+          '| 05:15 | 00:05   | 05:20 |',
+          '| 15:55 | 00:10   | 16:05 |',
+          '| 15:55 | 0:10    | 16:05 |',
+          '| 23:00 | 00:20   | 23:20 |',
+          '| 23:00 | -00:20  | 22:40 |',
+          '<!-- TBLFM: $3=(@0$1+@0$2);hm -->',
+        ]);
+      }
+      {
+        const textEditor = new TextEditor([
+          'foo',
+          '| A      | B     | C   |',
+          '| ------ | ----- | --- |',
+          '| 05:20  | 05:15 |     |',
+          '| 16:05  | 15:55 |     |',
+          '| 23:20  | 23:00 |     |',
+          '| 10:20  | 20:00 |     |',
+          '<!-- TBLFM: $3=(@0$1-@0$2) -->',
+        ]);
+        textEditor.setCursorPosition(new Point(1, 0));
+        const tableEditor = new TableEditor(textEditor);
+        const err = tableEditor.evaluateFormulas(defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(err).to.be.undefined;
+        expect(pos.row).to.equal(1);
+        expect(pos.column).to.equal(0);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| A     | B     | C         |',
+          '| ----- | ----- | --------- |',
+          '| 05:20 | 05:15 | 300000    |',
+          '| 16:05 | 15:55 | 600000    |',
+          '| 23:20 | 23:00 | 1200000   |',
+          '| 10:20 | 20:00 | -34800000 |',
+          '<!-- TBLFM: $3=(@0$1-@0$2) -->',
+        ]);
+      }
+    });
+
     it('should not have floating point arithmetic errors', () => {
       {
         const textEditor = new TextEditor([
@@ -2192,5 +2298,60 @@ describe('Formulas', () => {
         ]);
       }
     });
+  });
+
+  it('should correctly handle time examples in the documentation', () => {
+    {
+      const textEditor = new TextEditor([
+        'foo',
+        '| Start            | Duration | End |',
+        '| ---------------- | -------- | --- |',
+        '| 2023-07-12 10:00 | 0:10     |     |',
+        '<!-- TBLFM: $>=($1 + $2);dt -->',
+      ]);
+      textEditor.setCursorPosition(new Point(1, 0));
+      const tableEditor = new TableEditor(textEditor);
+      const err = tableEditor.evaluateFormulas(defaultOptions);
+      const pos = textEditor.getCursorPosition();
+      expect(err).to.be.undefined;
+      expect(pos.row).to.equal(1);
+      expect(pos.column).to.equal(0);
+      expect(textEditor.getSelectionRange()).to.be.undefined;
+      expect(textEditor.getLines()).to.deep.equal([
+        'foo',
+        '| Start            | Duration | End              |',
+        '| ---------------- | -------- | ---------------- |',
+        '| 2023-07-12 10:00 | 0:10     | 2023-07-12 10:10 |',
+        '<!-- TBLFM: $>=($1 + $2);dt -->',
+      ]);
+    }
+    {
+      const textEditor = new TextEditor([
+        'foo',
+        '| Start            | End              | Ms | Mins | Duration |',
+        '| ---------------- | ---------------- | -- | ---- | -------- |',
+        '| 2023-07-12 10:00 | 2023-07-12 12:10 |    |      |          |',
+        '<!-- TBLFM: $3=($2 - $1) -->',
+        '<!-- TBLFM: $4=(($2 - $1) / 60000) -->',
+        '<!-- TBLFM: $5=($2 - $1);hm -->',
+      ]);
+      textEditor.setCursorPosition(new Point(1, 0));
+      const tableEditor = new TableEditor(textEditor);
+      const err = tableEditor.evaluateFormulas(defaultOptions);
+      const pos = textEditor.getCursorPosition();
+      expect(err).to.be.undefined;
+      expect(pos.row).to.equal(1);
+      expect(pos.column).to.equal(0);
+      expect(textEditor.getSelectionRange()).to.be.undefined;
+      expect(textEditor.getLines()).to.deep.equal([
+        'foo',
+        '| Start            | End              | Ms      | Mins | Duration |',
+        '| ---------------- | ---------------- | ------- | ---- | -------- |',
+        '| 2023-07-12 10:00 | 2023-07-12 12:10 | 7800000 | 130  | 02:10    |',
+        '<!-- TBLFM: $3=($2 - $1) -->',
+        '<!-- TBLFM: $4=(($2 - $1) / 60000) -->',
+        '<!-- TBLFM: $5=($2 - $1);hm -->',
+      ]);
+    }
   });
 });

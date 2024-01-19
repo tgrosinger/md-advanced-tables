@@ -373,6 +373,7 @@ decimal points by using a formatting directive. For example:
 | 1   | 2   | 5   | 6   |
 | 3   | 4   | 7   | 8   |
 |     |     |     |     |
+
 <!-- TBLFM: @>=(@I / @3$4);%.2f -->
 ```
 
@@ -381,8 +382,9 @@ that, the results would be values such as `0.14285714285714285`, but because
 we have requested `2` decimal points, the results will instead be `0.14`.
 
 You may also output the result as a datetime with the `;dt` formatting
-directive. In this example, we take a datetime and add 600000 milliseconds, then
-output the result as a datetime.
+directive or as hours and minutes with the `;hm` formatting directive. In this
+example, we take a datetime and add 600000 milliseconds, then output the result
+as a datetime.
 
 ```
 | Start            | Ms     | End              |
@@ -395,19 +397,20 @@ output the result as a datetime.
 
 There is very basic support for operating on times in tables.
 
-Times are always represented as either a datetime string (2022-12-31 23:59), or
-as milliseconds since the epoch (1672559940000). When operating with durations,
-they must be expressed in milliseconds.
+Times are represented as either a datetime string (2022-12-31 23:59), or
+as milliseconds since the epoch (1672559940000). Durations may be expressed
+either as hours and minutes (23:59) or in milliseconds.
 
-For example, we can subtract an end time from a start time and view the duration
-in minutes:
+For example, we can subtract an end time from a start time and view the
+duration in milliseconds or as hours and minutes:
 
 ```
-| Start            | End              | Ms     | Min |
-| ---------------- | ---------------- | ------ | --- |
-| 2023-07-12 10:00 | 2023-07-12 10:10 | 600000 | 10  |
+| Start            | End              | Ms      | Mins | Duration |
+| ---------------- | ---------------- | ------- | ---- | -------- |
+| 2023-07-12 10:00 | 2023-07-12 12:10 | 7800000 | 130  | 02:10    |
 <!-- TBLFM: $3=($2 - $1) -->
-<!-- TBLFM: $4=($3 / 60000) -->
+<!-- TBLFM: $4=(($2 - $1) / 60000) -->
+<!-- TBLFM: $5=($2 - $1);hm -->
 ```
 
 ## Conclusion

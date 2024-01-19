@@ -5,6 +5,8 @@ const datetimeRe = new RegExp(
   '[1-9][0-9]{3}-[01][0-9]-[0-3][0-9][T ][0-2][0-9]:[0-5][0-9]',
 );
 
+const durationRe = new RegExp('^-?[0-9]+:[0-5][0-9]');
+
 export const FloatOrMilliseconds = (value: string): Decimal => {
   const v = value.trim();
   if (v === '') {
@@ -13,6 +15,13 @@ export const FloatOrMilliseconds = (value: string): Decimal => {
 
   if (datetimeRe.test(v)) {
     return new Decimal(new Date(v).valueOf());
+  }
+
+  if (durationRe.test(v)) {
+    const neg = v.charAt(0) == '-';
+    const w = v.slice(neg ? 1 : 0);
+    const minutes = parseInt(w.slice(0, -3)) * 60 + parseInt(w.slice(-2));
+    return new Decimal((neg ? -1 : 1) * minutes * 60000);
   }
 
   const decimalValue = new Decimal(v);
