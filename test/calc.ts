@@ -2354,4 +2354,43 @@ describe('Formulas', () => {
       ]);
     }
   });
+
+  it('should correctly process a larger example', () => {
+    {
+      const textEditor = new TextEditor([
+        'foo',
+        '| Task             | Start |   End | Duration |',
+        '| ---------------- | ----- | -----:| --------:|',
+        '| Plan day         | 09:00 | 09:15 |          |',
+        '| Fix Bug#1        | 09:27 | 11:33 |          |',
+        '| Fix Bug#2        |       | 12:22 |          |',
+        '| Triage bugs      | 13:00 | 17:00 |          |',
+        '| Clean desk       |       | 17:30 |          |',
+        '| **Total**        |       |       |          |',
+        '<!-- TBLFM: $>=($3 - if($2>0, $2, @-1$3));hm -->',
+        '<!-- TBLFM: @>$>=sum(@I..@-1);hm -->',
+      ]);
+      textEditor.setCursorPosition(new Point(1, 0));
+      const tableEditor = new TableEditor(textEditor);
+      const err = tableEditor.evaluateFormulas(defaultOptions);
+      const pos = textEditor.getCursorPosition();
+      expect(err).to.be.undefined;
+      expect(pos.row).to.equal(1);
+      expect(pos.column).to.equal(0);
+      expect(textEditor.getSelectionRange()).to.be.undefined;
+      expect(textEditor.getLines()).to.deep.equal([
+        'foo',
+        '| Task        | Start |   End | Duration |',
+        '| ----------- | ----- | -----:| --------:|',
+        '| Plan day    | 09:00 | 09:15 |    00:15 |',
+        '| Fix Bug#1   | 09:27 | 11:33 |    02:06 |',
+        '| Fix Bug#2   |       | 12:22 |    00:49 |',
+        '| Triage bugs | 13:00 | 17:00 |    04:00 |',
+        '| Clean desk  |       | 17:30 |    00:30 |',
+        '| **Total**   |       |       |    07:40 |',
+        '<!-- TBLFM: $>=($3 - if($2>0, $2, @-1$3));hm -->',
+        '<!-- TBLFM: @>$>=sum(@I..@-1);hm -->',
+      ]);
+    }
+  });
 });

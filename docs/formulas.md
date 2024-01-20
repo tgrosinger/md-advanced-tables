@@ -413,6 +413,28 @@ duration in milliseconds or as hours and minutes:
 <!-- TBLFM: $5=($2 - $1);hm -->
 ```
 
+Durations formatted as hours and minutes may also be used to represent a time
+of day.
+
+This next example shows a table someone might use to track time they spend on
+tasks. They fill in each task name along with task start and end times,
+optionally omitting a start time if it is the same as the previous tasks' end
+time. The formulas calculate the duration of each task, along with the total
+time spent on all tasks.
+
+```
+| Task        | Start |   End | Duration |
+| ----------- | ----- | -----:| --------:|
+| Plan day    | 09:00 | 09:15 |    00:15 |
+| Fix Bug#1   | 09:27 | 11:33 |    02:06 |
+| Fix Bug#2   |       | 12:22 |    00:49 |
+| Triage bugs | 13:00 | 17:00 |    04:00 |
+| Clean desk  |       | 17:30 |    00:30 |
+| **Total**   |       |       |    07:40 |
+<!-- TBLFM: $>=($3 - if($2>0, $2, @-1$3));hm -->
+<!-- TBLFM: @>$>=sum(@I..@-1);hm -->
+```
+
 ## Conclusion
 
 This documentation is a work in progress. Please help improve this
