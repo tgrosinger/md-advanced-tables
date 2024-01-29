@@ -17,6 +17,7 @@ export class DefaultFormatter {
 export class DisplayDirective {
   private readonly decimalLength: number;
   private readonly displayAsDatetime: boolean;
+  private readonly displayAsHourMinute: boolean;
 
   constructor(ast: IToken) {
     let typeError = checkType(ast, 'display_directive');
@@ -47,13 +48,16 @@ export class DisplayDirective {
       formattingDirective,
       'formatting_directive',
       'datetime_directive',
+      'hourminute_directive',
     );
     if (typeError) {
       throw typeError;
     }
 
     this.displayAsDatetime = formattingDirective.type === 'datetime_directive';
-    if (this.displayAsDatetime) {
+    this.displayAsHourMinute =
+      formattingDirective.type === 'hourminute_directive';
+    if (this.displayAsDatetime || this.displayAsHourMinute) {
       this.decimalLength = -1;
       return;
     }
@@ -86,6 +90,15 @@ export class DisplayDirective {
       const h = pad(date.getHours());
       const min = pad(date.getMinutes());
       return `${y}-${mo}-${d} ${h}:${min}`;
+    }
+
+    if (this.displayAsHourMinute) {
+      let sign = parsed < 0 ? '-' : '';
+      const minutes = Math.floor(Math.abs(parsed) / 60000);
+      const pad = (v: number): string => `0${v}`.slice(-2);
+      const h = pad(Math.floor(minutes / 60));
+      const m = pad(minutes % 60);
+      return `${sign}${h}:${m}`;
     }
 
     return parsed.toFixed(this.decimalLength);
