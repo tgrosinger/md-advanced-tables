@@ -53,7 +53,7 @@ export const newDestination = (
       return err(new Error('Index 0 may not be used in a destination'));
     }
 
-    return err(error);
+    return err(error as Error);
   }
 };
 

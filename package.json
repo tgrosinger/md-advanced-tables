@@ -47,27 +47,27 @@
   "devDependencies": {
     "@types/chai": "4.2.14",
     "@types/expect": "24.3.0",
-    "@types/lodash": "4.14.165",
-    "@types/mocha": "8.0.3",
-    "@typescript-eslint/eslint-plugin": "4.6.1",
-    "@typescript-eslint/parser": "4.6.1",
+    "@types/lodash": "4.14.202",
+    "@types/mocha": "10.0.6",
+    "@typescript-eslint/eslint-plugin": "6.19.1",
+    "@typescript-eslint/parser": "6.19.1",
     "chai": "4.2.0",
     "esdoc-importpath-plugin": "^1.0.2",
-    "eslint": "7.14.0",
+    "eslint": "8.56.0",
     "eslint-plugin-chai-friendly": "0.6.0",
-    "eslint-plugin-import": "2.22.1",
-    "eslint-plugin-jsdoc": "30.7.6",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-jsdoc": "48.0.4",
     "eslint-plugin-prefer-arrow": "1.2.2",
     "eslint-plugin-simple-import-sort": "5.0.3",
-    "mocha": "8.2.0",
-    "ts-node": "9.1.0",
-    "tslib": "2.0.3",
-    "typescript": "4.1.2"
+    "mocha": "10.2.0",
+    "ts-node": "10.9.2",
+    "tslib": "2.6.2",
+    "typescript": "5.3.3"
   },
   "dependencies": {
     "decimal.js": "10.4.3",
-    "ebnf": "1.9.0",
-    "lodash": "4.17.20",
+    "ebnf": "1.9.1",
+    "lodash": "4.17.21",
     "meaw": "5.0.0"
   }
 }

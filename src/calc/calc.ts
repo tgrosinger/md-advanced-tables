@@ -143,7 +143,7 @@ const newValueProvider = (
         throw Error('Unrecognized valueProvider type ' + ast.type);
     }
   } catch (error) {
-    return err(error);
+    return err(error as Error);
   }
 };
 
@@ -234,6 +234,6 @@ export const parseFormula = (
     } while (unparsedFormulas.length > 0);
     return ok(formulas);
   } catch (error) {
-    return err(error);
+    return err(error as Error);
   }
 };

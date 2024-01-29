@@ -27,7 +27,7 @@ export const newColumn = (ast: IToken, table: Table): Result<Column, Error> => {
         );
     }
   } catch (error) {
-    return err(error);
+    return err(error as Error);
   }
 };
 
