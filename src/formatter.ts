@@ -4,6 +4,7 @@ import { Table } from './table';
 import { TableCell } from './table-cell';
 import { TableRow } from './table-row';
 import { getEAW } from 'meaw';
+const removeMd = require('remove-md');
 
 export interface FormattedTable {
   /**
@@ -209,7 +210,10 @@ export const _computeTextWidth = (
   text: string,
   options: TextWidthOptions,
 ): number => {
-  const normalized = options.normalize ? text.normalize('NFC') : text;
+  const unformattedText = removeMd(text);
+  const normalized = options.normalize
+    ? unformattedText.normalize('NFC')
+    : unformattedText;
   let w = 0;
   for (const char of normalized) {
     if (options.wideChars.has(char)) {
@@ -275,6 +279,14 @@ export const _alignText = (
  * @private
  */
 export const _padText = (text: string): string => ` ${text} `;
+
+/**
+ * Returns true if markdown string contains inline link, else false
+ *
+ * @private
+ */
+const _detectMdLink = (text: string): boolean => /\[([^\]]*?)\][\[\(]https?:\/\/.*?[\]\)]/g.test(text);
+
 
 /**
  * Formats a table.
@@ -347,7 +359,7 @@ export const _formatTable = (
               _padText(
                 _alignText(
                   cell.content,
-                  columnWidths[j],
+                  _detectMdLink (cell.content) ? columnWidths[j] : columnWidths[j] + 2,
                   options.headerAlignment === HeaderAlignment.FOLLOW
                     ? alignments[j] === Alignment.NONE
                       ? options.defaultAlignment
@@ -370,7 +382,7 @@ export const _formatTable = (
           .getCells()
           .map(
             (cell, j) =>
-              new TableCell(_delimiterText(alignments[j], columnWidths[j])),
+              new TableCell(_delimiterText(alignments[j], _detectMdLink(cell.content) ? columnWidths[j] : columnWidths[j] + 2)),
           ),
         marginLeft,
         '',
@@ -390,7 +402,7 @@ export const _formatTable = (
                 _padText(
                   _alignText(
                     cell.content,
-                    columnWidths[j],
+                    _detectMdLink(cell.content) ? columnWidths[j] : columnWidths[j] + 2,
                     alignments[j] === Alignment.NONE
                       ? options.defaultAlignment
                       : alignments[j],
