@@ -34,6 +34,9 @@ export class SingleParamFunctionCall implements ValueProvider {
       case 'mean':
         this.op = mean;
         break;
+      case 'median':
+        this.op = median;
+        break;
       default:
         throw Error('Unknown single param function call: ' + functionName);
     }
@@ -90,4 +93,21 @@ const mean = (value: Value): Value => {
   );
 
   return new Value([[(total / count).toString()]]);
+};
+/**
+ * Median of all the cells in the input value, producing a single cell output.
+ */
+const median = (value: Value): Value => {
+  const sortedValues = [...value.val].sort((a, b) => a - b);
+  let isEven;
+  let middleIndex;
+  if (sortedValues.length % 2 == 0) {
+    middleIndex = sortedValues.length / 2;
+    isEven = true;
+  }
+  else {
+    middleIndex = (sortedValues.length - 1) / 2;
+    isEven = false;
+  }
+  return new Value([[(isEven ? (sortedValues[middleIndex - 1] + sortedValues[middleIndex]) / 2 : sortedValues[middleIndex]).toString()]]);
 };
