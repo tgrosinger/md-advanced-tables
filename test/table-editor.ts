@@ -4740,6 +4740,82 @@ describe('TableEditor', () => {
         ]);
       }
     })
+
+    it('should transpose a 2x2 table correctly', () => {
+        const textEditor = new TextEditor([
+          '| A | B |',
+          '|---|---|',
+          '| 1 | 2 |'
+        ]);
+        const tableEditor = new TableEditor(textEditor);
+        tableEditor.transpose(defaultOptions);
+        expect(textEditor.getLines()).to.deep.equal([
+          '| A   | 1   |',
+          '| --- | --- |',
+          '| B   | 2   |'
+        ]);
+    });
+
+    it('should handle a table with only headers', () => {
+      const textEditor = new TextEditor([
+        '| A | B | C |',
+        '|---|---|---|'
+      ]);
+      const tableEditor = new TableEditor(textEditor);
+      tableEditor.transpose(defaultOptions);
+      expect(textEditor.getLines()).to.deep.equal([
+        '| A   |',
+        '| --- |',
+        '| B   |',
+        '| C   |'
+      ]);
+    });
+
+    it('should transpose a table with empty cells', () => {
+      const textEditor = new TextEditor([
+        '| A | B | C |',
+        '|---|---|---|',
+        '| 1 |   | 3 |',
+        '| 4 | 5 |   |'
+      ]);
+      const tableEditor = new TableEditor(textEditor);
+      tableEditor.transpose(defaultOptions);
+      expect(textEditor.getLines()).to.deep.equal([
+        '| A   | 1   | 4   |',
+        '| --- | --- | --- |',
+        '| B   |     | 5   |',
+        '| C   | 3   |     |'
+      ]);
+    });
+
+    it('should handle a single column table', () => {
+      const textEditor = new TextEditor([
+        '| A |',
+        '|---|',
+        '| 1 |',
+        '| 2 |',
+        '| 3 |'
+      ]);
+      const tableEditor = new TableEditor(textEditor);
+      tableEditor.transpose(defaultOptions);
+      expect(textEditor.getLines()).to.deep.equal([
+        '| A   | 1   | 2   | 3   |',
+        '| --- | --- | --- | --- |'
+      ]);
+    });
+
+    it('should handle a table with only one cell', () => {
+      const textEditor = new TextEditor([
+        '| A |',
+        '|---|'
+      ]);
+      const tableEditor = new TableEditor(textEditor);
+      tableEditor.transpose(defaultOptions);
+      expect(textEditor.getLines()).to.deep.equal([
+        '| A   |',
+        '| --- |'
+      ]);
+    });
   });
 
   /**
