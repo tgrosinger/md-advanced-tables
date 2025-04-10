@@ -42,8 +42,8 @@ relative_row ::= "@" ( "-" | "+" ) int
 relative_column ::= "$" ( "-" | "+" ) int
 
 absolute_reference ::= absolute_row absolute_column | absolute_row | absolute_column
-absolute_row ::= "@" ( "I" | "<" | ">" | int )
-absolute_column ::= "$" ( "<" | ">" | int )
+absolute_row ::= "@" ( "I" | ("<" | ">") (("+" | "-") int)? | int )
+absolute_column ::= "$" ( ("<" | ">") (("+" | "-") int)? | int )
 
 single_param_function_call ::= single_param_function "(" source ")" 
 single_param_function      ::= "mean" | "sum"

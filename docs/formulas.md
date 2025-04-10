@@ -74,6 +74,8 @@ would mean "the same row, two columns right".
 
 When writing a cell reference, if the row or column portion is omitted, it means "in the current row" or "in the current column". In our example, `@I` and `@-1` have both omitted the column, so these references are for the same column as the destination cell.
 
+You can combine first and last arguments with a cell reference. `@>-1` and `$>-2` references the 2nd to last row and 3rd to last column, respectively. This is useful for referencing fixed points near the bottom of an expanding table. You can also reference 2nd to first row/columns with `@<+1` and `$<+1`, respectively.
+
 ### Ranges
 
 When writing `@2` by itself it means literally "row 2", as in, the entire

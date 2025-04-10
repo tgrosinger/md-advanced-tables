@@ -6,6 +6,8 @@ module.exports = {
     sourceType: "module",
     project: ["./tsconfig.json"],
   },
+  "linebreak-style": ["off"],
+  "@typescript-eslint/quotes": ["error", "single", { "avoidEscape": true }],
   plugins: [
     "@typescript-eslint",
     "import",

@@ -76,7 +76,7 @@ export class AbsoluteColumn extends Column {
   constructor(ast: IToken, table: Table) {
     super();
 
-    let index = -1;
+    let index = 0;
     let symbol = '';
 
     switch (ast.children.length) {
@@ -89,6 +89,13 @@ export class AbsoluteColumn extends Column {
           throw err(typeError);
         }
         index = parseInt(ast.children[0].text);
+        // In the case of relative to first/last index ex: @>-3 
+        if (ast.text[1] === ">" || ast.text[1] === "<") {
+          symbol = ast.text[1];
+          if (ast.text[2] && ast.text[2] === "-") {
+            index *= -1;
+          }
+        }
         break;
       default:
         throw new Error(
@@ -101,10 +108,10 @@ export class AbsoluteColumn extends Column {
       case '':
         break;
       case '<':
-        index = 1;
+        index += 1;
         break;
       case '>':
-        index = table.getWidth();
+        index += table.getWidth();
         break;
       default:
         throw new Error(`Invalid column symbol '${symbol}'`);
