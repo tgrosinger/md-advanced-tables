@@ -629,6 +629,68 @@ describe('Formulas', () => {
       }
     });
 
+    it('should handle durations over 99:59', () => {
+      {
+        const textEditor = new TextEditor([
+          'foo',
+          '| Duration |',
+          '| -------- |',
+          '| 99:00    |',
+          '| 1:00     |',
+          '|          |',
+          '<!-- TBLFM: @>$>=sum(@I..@-1);hm -->',
+        ]);
+        textEditor.setCursorPosition(new Point(1, 0));
+        const tableEditor = new TableEditor(textEditor);
+        const err = tableEditor.evaluateFormulas(defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(err).to.be.undefined;
+        expect(pos.row).to.equal(1);
+        expect(pos.column).to.equal(0);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| Duration |',
+          '| -------- |',
+          '| 99:00    |',
+          '| 1:00     |',
+          '| 100:00   |',
+          '<!-- TBLFM: @>$>=sum(@I..@-1);hm -->',
+        ]);
+      }
+    });
+
+    it('should handle durations under -99:59', () => {
+      {
+        const textEditor = new TextEditor([
+          'foo',
+          '| Duration |',
+          '| -------- |',
+          '| -99:00   |',
+          '| -1:00    |',
+          '|          |',
+          '<!-- TBLFM: @>$>=sum(@I..@-1);hm -->',
+        ]);
+        textEditor.setCursorPosition(new Point(1, 0));
+        const tableEditor = new TableEditor(textEditor);
+        const err = tableEditor.evaluateFormulas(defaultOptions);
+        const pos = textEditor.getCursorPosition();
+        expect(err).to.be.undefined;
+        expect(pos.row).to.equal(1);
+        expect(pos.column).to.equal(0);
+        expect(textEditor.getSelectionRange()).to.be.undefined;
+        expect(textEditor.getLines()).to.deep.equal([
+          'foo',
+          '| Duration |',
+          '| -------- |',
+          '| -99:00   |',
+          '| -1:00    |',
+          '| -100:00  |',
+          '<!-- TBLFM: @>$>=sum(@I..@-1);hm -->',
+        ]);
+      }
+    });
+
     it('should not have floating point arithmetic errors', () => {
       {
         const textEditor = new TextEditor([

@@ -1,4 +1,5 @@
 import { checkChildLength, checkType } from './ast_utils';
+import { padStart } from 'lodash';
 import { IToken } from 'ebnf';
 
 export interface Formatter {
@@ -79,11 +80,11 @@ export class DisplayDirective {
 
   public format = (num: number | string): string => {
     const parsed = typeof num === 'string' ? parseFloat(num) : num;
+    const pad = (v: number): string => padStart(`${v}`, 2, '0');
 
     if (this.displayAsDatetime) {
       // Seriously, there's no date formatting functionality in Javascript?
       const date = new Date(parsed);
-      const pad = (v: number): string => `0${v}`.slice(-2);
       const y = date.getFullYear();
       const mo = pad(date.getMonth() + 1);
       const d = pad(date.getDate());
@@ -93,9 +94,8 @@ export class DisplayDirective {
     }
 
     if (this.displayAsHourMinute) {
-      let sign = parsed < 0 ? '-' : '';
+      const sign = parsed < 0 ? '-' : '';
       const minutes = Math.floor(Math.abs(parsed) / 60000);
-      const pad = (v: number): string => `0${v}`.slice(-2);
       const h = pad(Math.floor(minutes / 60));
       const m = pad(minutes % 60);
       return `${sign}${h}:${m}`;
