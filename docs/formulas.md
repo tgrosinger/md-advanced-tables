@@ -362,6 +362,13 @@ These methods can be mixed.
 <!-- TBLFM: @5$3=sum(@2) -->
 ```
 
+## Numeric Values
+
+Formula calculations can read numbers with an optional currency symbol and
+comma thousands separators from table cells. For example, `$1,234.50` is
+treated as `1234.50`, `¥2,000` is treated as `2000`, and `2,000` is treated
+as `2000`.
+
 ## Formatting Options
 
 You can optionally request the result be output with a certain number of
@@ -380,6 +387,10 @@ decimal points by using a formatting directive. For example:
 In this example, the formatting directive is the `;%.2f` at the end. Without
 that, the results would be values such as `0.14285714285714285`, but because
 we have requested `2` decimal points, the results will instead be `0.14`.
+
+Currency results can be formatted with a dollar sign and comma thousands
+separators using `;$,.2f`. For example, `1419.5` will be output as
+`$1,419.50`.
 
 You may also output the result as a datetime with the `;dt` formatting
 directive or as hours and minutes with the `;hm` formatting directive. In this
