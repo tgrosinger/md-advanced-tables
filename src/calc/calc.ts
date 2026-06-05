@@ -57,7 +57,8 @@ algebraic_operation ::= "(" source " "? algebraic_operator " "? source ")"
 algebraic_operator  ::= "+" | "-" | "*" | "/"
 
 display_directive        ::= ";" display_directive_option
-display_directive_option ::= formatting_directive | datetime_directive | hourminute_directive
+display_directive_option ::= currency_formatting_directive | formatting_directive | datetime_directive | hourminute_directive
+currency_formatting_directive ::= "$,." int "f"
 formatting_directive     ::= "%." int "f"
 datetime_directive       ::= "dt"
 hourminute_directive     ::= "hm"
@@ -66,6 +67,47 @@ float ::= "-"? int "." int
 real ::= "-"? int
 int  ::= [0-9]+
 `;
+
+const excelCellReferenceRe = /\b([A-Za-z]+)([1-9][0-9]*)\b/g;
+const excelCellRangeRe =
+  /\b([A-Za-z]+)([1-9][0-9]*):([A-Za-z]+)([1-9][0-9]*)\b/g;
+const excelCurrentRowColumnRe =
+  /\b([A-Za-z]+)([1-9][0-9]*):([A-Za-z]+)\b/g;
+
+const columnLettersToIndex = (columnLetters: string): number =>
+  columnLetters
+    .toUpperCase()
+    .split('')
+    .reduce(
+      (index, letter) => index * 26 + letter.charCodeAt(0) - 'A'.charCodeAt(0) + 1,
+      0,
+    );
+
+const normalizeExcelReferences = (line: string): string =>
+  line
+    .replace(
+      excelCellRangeRe,
+      (
+        _match,
+        startColumn: string,
+        startRow: string,
+        endColumn: string,
+        endRow: string,
+      ): string =>
+        `@${startRow}$${columnLettersToIndex(startColumn)}..@${endRow}$${columnLettersToIndex(endColumn)}`,
+    )
+    .replace(
+      excelCurrentRowColumnRe,
+      (match, startColumn: string, _startRow: string, endColumn: string): string =>
+        startColumn.toUpperCase() === endColumn.toUpperCase()
+          ? `$${columnLettersToIndex(startColumn)}`
+          : match,
+    )
+    .replace(
+      excelCellReferenceRe,
+      (_match, columnLetters: string, rowNumber: string): string =>
+        `@${rowNumber}$${columnLettersToIndex(columnLetters)}`,
+    );
 
 export class Formula {
   private readonly source: Source;
@@ -197,7 +239,7 @@ export const parseFormula = (
   table: Table,
 ): Result<Formula[], Error> => {
   const parser = new Grammars.W3C.Parser(parserGrammar);
-  const ast = parser.getAST(line);
+  const ast = parser.getAST(normalizeExcelReferences(line));
 
   // TODO: Determine how to return errors when a formula-like string
   //       is not actually a valid formula.

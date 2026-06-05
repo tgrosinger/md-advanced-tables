@@ -136,6 +136,10 @@ single cell.
 
 When used together, the row should always preceed the column.
 
+Excel-style cell references are also supported for absolute cells. For
+example, `C6` is equivalent to `@6$3`, `A2` is equivalent to `@2$1`, and
+`AA10` is equivalent to `@10$27`.
+
 ### Ranges
 
 With just rows and columns, the formula is limited to selecting single cells,
@@ -160,6 +164,20 @@ Ranges can also be used to select more than a row or column.
 
 - `@<..@>` - The entire row from the first row, to the last (the whole table).
 - `@3$1..@4$3` - From row 3 to row 4, from column 1 to 3. Arity `2x3`
+
+Excel-style ranges may also be written with a colon. For example, `A2:C4` is
+equivalent to `@2$1..@4$3`.
+
+When filling a destination range, an Excel-style open-ended column reference
+can be used to reference that column in the current row. For example, `B2:B`
+is equivalent to `$2`.
+
+### Numeric Values
+
+Formula calculations can read numbers with an optional currency symbol and
+comma thousands separators from table cells. For example, `$1,234.50` is
+treated as `1234.50`, `¥2,000` is treated as `2000`, and `2,000` is treated
+as `2000`.
 
 ### Algebraic Operations
 
@@ -380,6 +398,10 @@ decimal points by using a formatting directive. For example:
 In this example, the formatting directive is the `;%.2f` at the end. Without
 that, the results would be values such as `0.14285714285714285`, but because
 we have requested `2` decimal points, the results will instead be `0.14`.
+
+Currency results can be formatted with a dollar sign and comma thousands
+separators using `;$,.2f`. For example, `1419.5` will be output as
+`$1,419.50`.
 
 You may also output the result as a datetime with the `;dt` formatting
 directive or as hours and minutes with the `;hm` formatting directive. In this

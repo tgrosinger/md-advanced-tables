@@ -17,6 +17,160 @@ describe('Formulas', () => {
    * @test {TableEditor#evaluateFormulas}
    */
   describe('#evaluateFormulas(options)', () => {
+    it('should understand Excel-style cell references', () => {
+      const textEditor = new TextEditor([
+        'foo',
+        '| A   | B   | C   |',
+        '| --- | --- | --- |',
+        '| 1   | 2   |     |',
+        '| 3   | 4   |     |',
+        '|     |     |     |',
+        '<!-- TBLFM: C3=A3 -->',
+      ]);
+      textEditor.setCursorPosition(new Point(1, 0));
+      const tableEditor = new TableEditor(textEditor);
+      const err = tableEditor.evaluateFormulas(defaultOptions);
+      expect(err).to.be.undefined;
+      expect(textEditor.getLines()).to.deep.equal([
+        'foo',
+        '| A   | B   | C   |',
+        '| --- | --- | --- |',
+        '| 1   | 2   |     |',
+        '| 3   | 4   | 3   |',
+        '|     |     |     |',
+        '<!-- TBLFM: C3=A3 -->',
+      ]);
+    });
+
+    it('should understand Excel-style ranges', () => {
+      const textEditor = new TextEditor([
+        'foo',
+        '| A   | B   | C   |',
+        '| --- | --- | --- |',
+        '| 1   | 2   |     |',
+        '| 3   | 4   |     |',
+        '|     |     |     |',
+        '<!-- TBLFM: C4=sum(A2:B3) -->',
+      ]);
+      textEditor.setCursorPosition(new Point(1, 0));
+      const tableEditor = new TableEditor(textEditor);
+      const err = tableEditor.evaluateFormulas(defaultOptions);
+      expect(err).to.be.undefined;
+      expect(textEditor.getLines()).to.deep.equal([
+        'foo',
+        '| A   | B   | C   |',
+        '| --- | --- | --- |',
+        '| 1   | 2   |     |',
+        '| 3   | 4   |     |',
+        '|     |     | 10  |',
+        '<!-- TBLFM: C4=sum(A2:B3) -->',
+      ]);
+    });
+
+    it('should understand Excel-style current-row column references', () => {
+      const textEditor = new TextEditor([
+        'foo',
+        '| Item | JPY    | HKD     |',
+        '| ---- | ------ | ------- |',
+        '| A    | 28700  |         |',
+        '| B    | 7789   |         |',
+        '| C    | 10020  |         |',
+        '| D    | 38987  |         |',
+        '| Rate | 1      | 0.04946 |',
+        '<!-- TBLFM: C2:C5=(B2:B*C6);%.2f -->',
+      ]);
+      textEditor.setCursorPosition(new Point(1, 0));
+      const tableEditor = new TableEditor(textEditor);
+      const err = tableEditor.evaluateFormulas(defaultOptions);
+      expect(err).to.be.undefined;
+      expect(textEditor.getLines()).to.deep.equal([
+        'foo',
+        '| Item | JPY   | HKD     |',
+        '| ---- | ----- | ------- |',
+        '| A    | 28700 | 1419.50 |',
+        '| B    | 7789  | 385.24  |',
+        '| C    | 10020 | 495.59  |',
+        '| D    | 38987 | 1928.30 |',
+        '| Rate | 1     | 0.04946 |',
+        '<!-- TBLFM: C2:C5=(B2:B*C6);%.2f -->',
+      ]);
+    });
+
+    it('should calculate yen currency values', () => {
+      const textEditor = new TextEditor([
+        'foo',
+        '| Item | JPY     | HKD      |',
+        '| ---- | ------- | -------- |',
+        '| A    | ¥28,700 |          |',
+        '| B    | ¥7,789  |          |',
+        '| Rate | 1       | $0.04946 |',
+        '<!-- TBLFM: C2:C3=(B2:B*C4);%.2f -->',
+      ]);
+      textEditor.setCursorPosition(new Point(1, 0));
+      const tableEditor = new TableEditor(textEditor);
+      const err = tableEditor.evaluateFormulas(defaultOptions);
+      expect(err).to.be.undefined;
+      expect(textEditor.getLines()).to.deep.equal([
+        'foo',
+        '| Item | JPY     | HKD      |',
+        '| ---- | ------- | -------- |',
+        '| A    | ¥28,700 | 1419.50  |',
+        '| B    | ¥7,789  | 385.24   |',
+        '| Rate | 1       | $0.04946 |',
+        '<!-- TBLFM: C2:C3=(B2:B*C4);%.2f -->',
+      ]);
+    });
+
+    it('should format calculated currency values with dollar signs and thousands separators', () => {
+      const textEditor = new TextEditor([
+        'foo',
+        '| Item | JPY      | HKD       |',
+        '| ---- | -------- | --------- |',
+        '| A    | ¥28,700  |           |',
+        '| B    | ¥233,859 |           |',
+        '| Rate | 1        | $0.04946  |',
+        '| Sum  | -        |           |',
+        '<!-- TBLFM: C2:C3=(B2:B*C4);$,.2f -->',
+        '<!-- TBLFM: C5=sum(C2:C3);$,.2f -->',
+      ]);
+      textEditor.setCursorPosition(new Point(1, 0));
+      const tableEditor = new TableEditor(textEditor);
+      const err = tableEditor.evaluateFormulas(defaultOptions);
+      expect(err).to.be.undefined;
+      expect(textEditor.getLines()).to.deep.equal([
+        'foo',
+        '| Item | JPY      | HKD        |',
+        '| ---- | -------- | ---------- |',
+        '| A    | ¥28,700  | $1,419.50  |',
+        '| B    | ¥233,859 | $11,566.67 |',
+        '| Rate | 1        | $0.04946   |',
+        '| Sum  | -        | $12,986.17 |',
+        '<!-- TBLFM: C2:C3=(B2:B*C4);$,.2f -->',
+        '<!-- TBLFM: C5=sum(C2:C3);$,.2f -->',
+      ]);
+    });
+
+    it('should calculate currency and thousands-delimited cell values', () => {
+      const textEditor = new TextEditor([
+        'foo',
+        '| A         | B         | C   |',
+        '| --------- | --------- | --- |',
+        '| $1,234.50 | 2,000     |     |',
+        '<!-- TBLFM: C2=sum(A2:B2) -->',
+      ]);
+      textEditor.setCursorPosition(new Point(1, 0));
+      const tableEditor = new TableEditor(textEditor);
+      const err = tableEditor.evaluateFormulas(defaultOptions);
+      expect(err).to.be.undefined;
+      expect(textEditor.getLines()).to.deep.equal([
+        'foo',
+        '| A         | B     | C      |',
+        '| --------- | ----- | ------ |',
+        '| $1,234.50 | 2,000 | 3234.5 |',
+        '<!-- TBLFM: C2=sum(A2:B2) -->',
+      ]);
+    });
+
     it('should understand absolute cell replacements', () => {
       {
         const textEditor = new TextEditor([
