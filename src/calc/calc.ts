@@ -57,7 +57,8 @@ algebraic_operation ::= "(" source " "? algebraic_operator " "? source ")"
 algebraic_operator  ::= "+" | "-" | "*" | "/"
 
 display_directive        ::= ";" display_directive_option
-display_directive_option ::= formatting_directive | datetime_directive | hourminute_directive
+display_directive_option ::= currency_formatting_directive | formatting_directive | datetime_directive | hourminute_directive
+currency_formatting_directive ::= "$,." int "f"
 formatting_directive     ::= "%." int "f"
 datetime_directive       ::= "dt"
 hourminute_directive     ::= "hm"

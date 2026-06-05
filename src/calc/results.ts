@@ -6,6 +6,11 @@ const datetimeRe = new RegExp(
 );
 
 const durationRe = new RegExp('^-?[0-9]+:[0-5][0-9]');
+const currencyOrDelimitedNumberRe =
+  /^-?[$¥]?(?:[0-9]+|[0-9]{1,3}(?:,[0-9]{3})+)(?:\.[0-9]+)?$/;
+
+const normalizeNumber = (value: string): string =>
+  currencyOrDelimitedNumberRe.test(value) ? value.replace(/[$¥,]/g, '') : value;
 
 export const FloatOrMilliseconds = (value: string): Decimal => {
   const v = value.trim();
@@ -24,7 +29,7 @@ export const FloatOrMilliseconds = (value: string): Decimal => {
     return new Decimal((neg ? -1 : 1) * minutes * 60000);
   }
 
-  const decimalValue = new Decimal(v);
+  const decimalValue = new Decimal(normalizeNumber(v));
   return decimalValue.isNaN() ? new Decimal(0) : decimalValue;
 };
 

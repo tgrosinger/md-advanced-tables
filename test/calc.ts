@@ -17,6 +17,56 @@ describe('Formulas', () => {
    * @test {TableEditor#evaluateFormulas}
    */
   describe('#evaluateFormulas(options)', () => {
+    it('should calculate currency and thousands-delimited cell values', () => {
+      const textEditor = new TextEditor([
+        'foo',
+        '| A         | B       | C   |',
+        '| --------- | ------- | --- |',
+        '| $1,234.50 | ¥28,700 |     |',
+        '<!-- TBLFM: @2$3=sum(@2$1..@2$2) -->',
+      ]);
+      textEditor.setCursorPosition(new Point(1, 0));
+      const tableEditor = new TableEditor(textEditor);
+      const err = tableEditor.evaluateFormulas(defaultOptions);
+      expect(err).to.be.undefined;
+      expect(textEditor.getLines()).to.deep.equal([
+        'foo',
+        '| A         | B       | C       |',
+        '| --------- | ------- | ------- |',
+        '| $1,234.50 | ¥28,700 | 29934.5 |',
+        '<!-- TBLFM: @2$3=sum(@2$1..@2$2) -->',
+      ]);
+    });
+
+    it('should format calculated currency values with dollar signs and thousands separators', () => {
+      const textEditor = new TextEditor([
+        'foo',
+        '| Item | JPY      | HKD      |',
+        '| ---- | -------- | -------- |',
+        '| A    | ¥28,700  |          |',
+        '| B    | ¥233,859 |          |',
+        '| Rate | 1        | $0.04946 |',
+        '| Sum  | -        |          |',
+        '<!-- TBLFM: @2$3..@3$3=($2*@4$3);$,.2f -->',
+        '<!-- TBLFM: @5$3=sum(@2$3..@3$3);$,.2f -->',
+      ]);
+      textEditor.setCursorPosition(new Point(1, 0));
+      const tableEditor = new TableEditor(textEditor);
+      const err = tableEditor.evaluateFormulas(defaultOptions);
+      expect(err).to.be.undefined;
+      expect(textEditor.getLines()).to.deep.equal([
+        'foo',
+        '| Item | JPY      | HKD        |',
+        '| ---- | -------- | ---------- |',
+        '| A    | ¥28,700  | $1,419.50  |',
+        '| B    | ¥233,859 | $11,566.67 |',
+        '| Rate | 1        | $0.04946   |',
+        '| Sum  | -        | $12,986.17 |',
+        '<!-- TBLFM: @2$3..@3$3=($2*@4$3);$,.2f -->',
+        '<!-- TBLFM: @5$3=sum(@2$3..@3$3);$,.2f -->',
+      ]);
+    });
+
     it('should understand absolute cell replacements', () => {
       {
         const textEditor = new TextEditor([
