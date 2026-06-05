@@ -16,6 +16,7 @@ export class DefaultFormatter {
 
 export class DisplayDirective {
   private readonly decimalLength: number;
+  private readonly displayAsCurrency: boolean;
   private readonly displayAsDatetime: boolean;
   private readonly displayAsHourMinute: boolean;
 
@@ -46,6 +47,7 @@ export class DisplayDirective {
 
     typeError = checkType(
       formattingDirective,
+      'currency_formatting_directive',
       'formatting_directive',
       'datetime_directive',
       'hourminute_directive',
@@ -54,6 +56,8 @@ export class DisplayDirective {
       throw typeError;
     }
 
+    this.displayAsCurrency =
+      formattingDirective.type === 'currency_formatting_directive';
     this.displayAsDatetime = formattingDirective.type === 'datetime_directive';
     this.displayAsHourMinute =
       formattingDirective.type === 'hourminute_directive';
@@ -101,6 +105,17 @@ export class DisplayDirective {
       return `${sign}${h}:${m}`;
     }
 
-    return parsed.toFixed(this.decimalLength);
+    const fixed = parsed.toFixed(this.decimalLength);
+    if (!this.displayAsCurrency) {
+      return fixed;
+    }
+
+    const [whole, decimal] = fixed.split('.');
+    const sign = whole.startsWith('-') ? '-' : '';
+    const formattedWhole = whole
+      .slice(sign.length)
+      .replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    const formatted = decimal ? `${formattedWhole}.${decimal}` : formattedWhole;
+    return `${sign}$${formatted}`;
   };
 }
